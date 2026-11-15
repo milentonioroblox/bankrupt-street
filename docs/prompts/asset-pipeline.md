@@ -25,12 +25,12 @@ Roblox game's UI, characters, models or branding.
 
 ## 2. Asset list (after I approve the art bible), in this order
 
-a. Houses 1–10 (GDD §4.1 visual briefs). Each fits a 40×40 stud footprint,
+a. Houses 1–10 (GDD §4.1 visual briefs). Each fits a 64×64 stud footprint (up to ~120 studs tall for the towers),
    pivot at bottom centre, same scale. Low-poly for phones.
 b. Auction stage, podium, gavel, jumbotron frame, rescue kiosk, Hall board,
    daily kiosk, rebirth gate.
 c. 4 Skid Row properties (Street Stall, Food Cart, Kiosk, Corner Shop),
-   each fits a 12×12 slot pad.
+   each fits an 18×18 slot pad.
 d. Skid Row props from the map plan (streetlight, dumpster, power pole,
    bus stop, bench, chain-link fence, cones, shopping cart).
 e. UI: HUD, AuctionOverlay, RescueSheet, BankruptStinger, PropertyShop,

@@ -83,30 +83,31 @@ ol.steps li::marker { font-family: var(--font-mono); color: var(--accent); }
 .note { font-size: 13.5px; color: var(--muted); }
 ul.props { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
 svg text { font-family: var(--font-mono); fill: var(--label); paint-order: stroke; stroke: var(--label-halo); stroke-width: 3px; stroke-linejoin: round; }
-svg .t-sm { font-size: 7px; }
-svg .t-md { font-size: 9px; }
-svg .t-lg { font-size: 11px; font-weight: 500; }
-svg .dim { stroke: var(--accent); stroke-width: .8; fill: none; }
+svg .t-sm { font-size: 10px; }
+svg .t-md { font-size: 12px; }
+svg .t-lg { font-size: 15px; font-weight: 500; }
+svg .dim { stroke: var(--accent); stroke-width: 1.2; fill: none; }
 svg text.dimt { fill: var(--accent); }
-#plot svg text { stroke-width: 1px; }
-#plot svg .t-md { font-size: 4.2px; }
-#plot svg .t-sm { font-size: 3.4px; }
-#world svg text { stroke-width: 8px; font-size: 44px; }
+#plot svg text { stroke-width: 1.5px; }
+#plot svg .t-md { font-size: 6.5px; }
+#plot svg .t-sm { font-size: 5.5px; }
+#plot svg .dim { stroke-width: .8; }
+#world svg text { stroke-width: 10px; font-size: 56px; }
 #grid-layer { transition: opacity .2s; }
 @media (prefers-reduced-motion: reduce) { #grid-layer { transition: none; } }
 </style>
 
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bankrupt Street · Street 1 · Greybox plan v1</div>
+    <div class="eyebrow">Bankrupt Street · Street 1 · Greybox plan v2 (large plots)</div>
     <h1>Skid Row street plan</h1>
     <p class="lede">The map for the first street: 8 plots, the auction stage in the middle, spawn at the west end and the rebirth gate at the east end. All sizes are in Roblox studs and sized for an R15 avatar. Build it as grey blocks first. Art comes after the auction loop is fun.</p>
     <div class="scale-strip">
       <span><b>1 stud</b> ≈ 0.28 m</span>
       <span>Avatar <b>5.5 studs</b> tall</span>
       <span>Walk speed <b>16 studs/s</b></span>
-      <span>Play area <b>580 × 240</b></span>
-      <span>World <b>1400 × 1400</b></span>
+      <span>Play area <b>900 × 360</b></span>
+      <span>World <b>2000 × 2000</b></span>
       <span>Ground <b>Y = 0</b>, north = <b>−Z</b></span>
     </div>
   </header>
@@ -115,26 +116,26 @@ svg text.dimt { fill: var(--accent); }
     <div class="sheet">
       <div class="sheet-head">
         <h2>Street plan (top view)</h2>
-        <span>origin (0, 0) = centre of the plaza · grid 8 studs</span>
+        <span>origin (0, 0) = centre of the plaza · grid 16 studs</span>
       </div>
       <div class="controls">
-        <label><input type="checkbox" id="toggle-grid" checked> Show 8-stud grid</label>
+        <label><input type="checkbox" id="toggle-grid" checked> Show 16-stud grid</label>
         <label><input type="checkbox" id="toggle-dims" checked> Show dimensions</label>
       </div>
       <div class="drawing" id="plan"></div>
       <div class="legend" id="legend"></div>
     </div>
-    <p class="note">The walk from the farthest plot to the stage is about 190 studs, roughly 12 seconds. Players can bid from anywhere, but the stage is close enough that walking over feels natural.</p>
+    <p class="note">Plots are big enough for a 64 × 64 house and eight 18 × 18 property pads, so a Billionaire Estate has room to look rich. The walk from the farthest plot to the stage is about 330 studs, roughly 20 seconds. That is fine because players can bid from anywhere on the street, and the jumbotron is 56 studs wide so it reads from every plot.</p>
   </section>
 
   <section class="two">
     <div class="sheet">
-      <div class="sheet-head"><h2>One plot (detail)</h2><span>72 × 80 · road side at the bottom</span></div>
+      <div class="sheet-head"><h2>One plot (detail)</h2><span>112 × 128 · road side at the top</span></div>
       <div class="drawing small" id="plot"></div>
       <p class="note">North-side plots are mirrored, so the road side always faces the street. Slot pads are numbered 1–8 in the order they unlock. Level 1 (Cardboard Box) uses slots 1–2.</p>
     </div>
     <div class="sheet">
-      <div class="sheet-head"><h2>World around the street</h2><span>top view · 1400 × 1400</span></div>
+      <div class="sheet-head"><h2>World around the street</h2><span>top view · 2000 × 2000</span></div>
       <div class="drawing small" id="world"></div>
       <p class="note">The street sits in a valley. Tall derelict buildings directly behind the plots block the view at eye level. Fields and low hills come next, then a ring of mountains that fades into the haze.</p>
     </div>
@@ -158,13 +159,13 @@ svg text.dimt { fill: var(--accent); }
         <table>
           <thead><tr><th>Area</th><th>Roblox material</th><th>Notes</th></tr></thead>
           <tbody>
-            <tr><td>Street surface</td><td class="mono">Asphalt</td><td>Width 28. Cracks and potholes as decals. No cars drive here.</td></tr>
-            <tr><td>Sidewalks</td><td class="mono">Concrete</td><td>Width 10, raised 0.5 stud. Kerb step is walkable.</td></tr>
-            <tr><td>Plaza</td><td class="mono">Brick / Pavement</td><td>Replaces the street between X −48 and 48, so it reads as one square.</td></tr>
+            <tr><td>Street surface</td><td class="mono">Asphalt</td><td>Width 40. Cracks and potholes as decals. No cars drive here.</td></tr>
+            <tr><td>Sidewalks</td><td class="mono">Concrete</td><td>Width 14, raised 0.5 stud. Kerb step is walkable.</td></tr>
+            <tr><td>Plaza</td><td class="mono">Brick / Pavement</td><td>Replaces the street between X −80 and 80, so it reads as one square.</td></tr>
             <tr><td>Plots</td><td class="mono">Ground (terrain)</td><td>Patchy dirt with grass at the back. Upgrades can swap in a lawn later.</td></tr>
-            <tr><td>Alley behind plots</td><td class="mono">Cracked Concrete</td><td>Width 8, chain-link fence on the plot side.</td></tr>
-            <tr><td>Fields</td><td class="mono">Grass + LeafyGrass</td><td>Terrain, gently rolling, ±6 studs.</td></tr>
-            <tr><td>Mountains</td><td class="mono">Rock, Slate, Ground</td><td>Terrain. Snow only on the highest peaks past Z ±600.</td></tr>
+            <tr><td>Alley behind plots</td><td class="mono">Cracked Concrete</td><td>Width 12, chain-link fence on the plot side.</td></tr>
+            <tr><td>Fields</td><td class="mono">Grass + LeafyGrass</td><td>Terrain, gently rolling, ±8 studs.</td></tr>
+            <tr><td>Mountains</td><td class="mono">Rock, Slate, Ground</td><td>Terrain. Snow only on the highest peaks past ±850.</td></tr>
           </tbody>
         </table>
       </div>
@@ -172,7 +173,7 @@ svg text.dimt { fill: var(--accent); }
     <div class="sheet">
       <h2>Props (Skid Row)</h2>
       <ul class="props">
-        <li>Streetlights every 32 studs on both sidewalks, 16 tall, warm light (Range 24).</li>
+        <li>Streetlights every 40 studs on both sidewalks, 20 tall, warm light (Range 32).</li>
         <li>Power poles with sagging wires along both alleys.</li>
         <li>Dumpsters, trash bags, traffic cones and shopping carts at plot gaps. Keep the slot pads clear.</li>
         <li>Chain-link fences and graffiti decals (cartoon, no text) on the backdrop buildings.</li>
@@ -240,9 +241,12 @@ svg text.dimt { fill: var(--accent); }
 <script>
 (function () {
   // ---- Single source of truth: every object in studs (x, z = centre; w = size X; d = size Z) ----
-  const PLOT_W = 72, PLOT_D = 80, ROAD = 28, WALK = 10, PLAZA_HALF = 48;
-  const FRONT = ROAD / 2 + WALK;            // 24: plot front edge distance from street centre
-  const plotXs = [-172, -92, 92, 172];       // plot centres along X (gap 8 between plots and plaza)
+  const PLOT_W = 112, PLOT_D = 128, ROAD = 40, WALK = 14, PLAZA_HALF = 80, GAP = 12;
+  const FRONT = ROAD / 2 + WALK;                       // 34: plot front edge distance from street centre
+  const inner = PLAZA_HALF + GAP + PLOT_W / 2;         // 148
+  const outer = inner + PLOT_W + GAP;                  // 272
+  const plotXs = [-outer, -inner, inner, outer];
+  const PLAY_W = 900, PLAY_D = 360;
   const plots = [];
   plotXs.forEach((x, i) => plots.push({ name: "Plot" + (i + 1), x, z: -(FRONT + PLOT_D / 2), north: true }));
   plotXs.forEach((x, i) => plots.push({ name: "Plot" + (i + 5), x, z: FRONT + PLOT_D / 2, north: false }));
@@ -254,27 +258,27 @@ svg text.dimt { fill: var(--accent); }
   };
 
   const objects = [
-    { name: "Street", what: "Street surface (asphalt)", x: 0, z: 0, w: 580, d: ROAD, h: 1, fill: C.asphalt },
-    { name: "SidewalkNorth", what: "North sidewalk", x: 0, z: -(ROAD / 2 + WALK / 2), w: 580, d: WALK, h: 1.5, fill: C.concrete },
-    { name: "SidewalkSouth", what: "South sidewalk", x: 0, z: ROAD / 2 + WALK / 2, w: 580, d: WALK, h: 1.5, fill: C.concrete },
-    { name: "Plaza", what: "Central plaza (replaces street here)", x: 0, z: 0, w: PLAZA_HALF * 2, d: 208, h: 1, fill: C.brick },
-    { name: "Stage", what: "Auction stage platform", x: 0, z: -64, w: 40, d: 24, h: 4, fill: C.accent },
-    { name: "Jumbotron", what: "Jumbotron screen (SurfaceGui faces south)", x: 0, z: -79, w: 32, d: 2, h: 18, fill: C.ink, note: "bottom edge at Y 14" },
-    { name: "RentClock", what: "Rent + crash clock above jumbotron", x: 0, z: -79, w: 16, d: 2, h: 5, fill: C.gold, note: "bottom edge at Y 33", hidden: true },
-    { name: "RescueKiosk", what: "Rescue contribution kiosk", x: -30, z: -48, w: 6, d: 6, h: 7, fill: C.gold },
-    { name: "StageCamera", what: "Watch Auction camera spot", x: 26, z: -18, w: 3, d: 3, h: 1, fill: C.ink, note: "Y 12, looks at stage" },
-    { name: "HallOfFallen", what: "Hall of Fallen Millionaires wall (faces north, to stage)", x: 0, z: 96, w: 40, d: 3, h: 20, fill: C.ink },
-    { name: "Spawn", what: "Spawn area + bus stop", x: -258, z: 0, w: 44, d: 64, h: 1, fill: C.concrete },
-    { name: "DailyKiosk", what: "Daily rewards + Landlord Spin kiosk", x: -258, z: 40, w: 10, d: 8, h: 9, fill: C.gold },
-    { name: "RebirthGate", what: "Rebirth gate (locked until eligible)", x: 270, z: 0, w: 4, d: 40, h: 24, fill: C.gold },
+    { name: "Street", what: "Street surface (asphalt)", x: 0, z: 0, w: PLAY_W, d: ROAD, h: 1, fill: C.asphalt },
+    { name: "SidewalkNorth", what: "North sidewalk", x: 0, z: -(ROAD / 2 + WALK / 2), w: PLAY_W, d: WALK, h: 1.5, fill: C.concrete },
+    { name: "SidewalkSouth", what: "South sidewalk", x: 0, z: ROAD / 2 + WALK / 2, w: PLAY_W, d: WALK, h: 1.5, fill: C.concrete },
+    { name: "Plaza", what: "Central plaza (replaces street here)", x: 0, z: 0, w: PLAZA_HALF * 2, d: 2 * (FRONT + PLOT_D), h: 1, fill: C.brick },
+    { name: "Stage", what: "Auction stage platform", x: 0, z: -110, w: 64, d: 36, h: 6, fill: C.accent },
+    { name: "Jumbotron", what: "Jumbotron screen (SurfaceGui faces south)", x: 0, z: -132, w: 56, d: 3, h: 32, fill: C.ink, note: "bottom edge at Y 20" },
+    { name: "RentClock", what: "Rent + crash clock above jumbotron", x: 0, z: -132, w: 28, d: 3, h: 8, fill: C.gold, note: "bottom edge at Y 54", hidden: true },
+    { name: "RescueKiosk", what: "Rescue contribution kiosk", x: -48, z: -80, w: 8, d: 8, h: 9, fill: C.gold },
+    { name: "StageCamera", what: "Watch Auction camera spot", x: 40, z: -30, w: 4, d: 4, h: 1, fill: C.ink, note: "Y 18, looks at stage" },
+    { name: "HallOfFallen", what: "Hall of Fallen Millionaires wall (faces north, to stage)", x: 0, z: 150, w: 64, d: 4, h: 28, fill: C.ink },
+    { name: "Spawn", what: "Spawn area + bus stop", x: -390, z: 0, w: 80, d: 100, h: 1, fill: C.concrete },
+    { name: "DailyKiosk", what: "Daily rewards + Landlord Spin kiosk", x: -390, z: 64, w: 14, d: 10, h: 11, fill: C.gold },
+    { name: "RebirthGate", what: "Rebirth gate (locked until eligible)", x: 430, z: 0, w: 6, d: 60, h: 36, fill: C.gold },
   ];
 
+  const ALLEY_Z = FRONT + PLOT_D + 10;   // 172
+  const BACK_Z = ALLEY_Z + 24;           // 196
   const backdrop = [];
+  const heights = [44, 64, 52, 80, 48, 70, 56, 76, 46];
   [-1, 1].forEach(side => {
-    for (let i = 0; i < 6; i++) {
-      const x = -240 + i * 96;
-      backdrop.push({ x, z: side * 128, w: 88, d: 16, fill: C.building, h: [34, 48, 40, 56, 38, 44][i] });
-    }
+    for (let i = 0; i < 9; i++) backdrop.push({ x: -400 + i * 100, z: side * BACK_Z, w: 92, d: 28, fill: C.building, h: heights[(i + (side > 0 ? 3 : 0)) % 9] });
   });
 
   // ---- SVG helpers ----
@@ -292,138 +296,118 @@ svg text.dimt { fill: var(--accent); }
     return r;
   }
   function label(g, x, y, txt, cls, anchor) { return el("text", { x, y, class: cls || "t-md", "text-anchor": anchor || "middle", "dominant-baseline": "middle" }, g, txt); }
-  function dimH(g, x1, x2, y, txt) {
+  function dimH(g, x1, x2, y, txt, t) {
+    t = t || 4;
     el("line", { x1, y1: y, x2, y2: y, class: "dim" }, g);
-    el("line", { x1, y1: y - 3, x2: x1, y2: y + 3, class: "dim" }, g);
-    el("line", { x1: x2, y1: y - 3, x2, y2: y + 3, class: "dim" }, g);
-    label(g, (x1 + x2) / 2, y - 5, txt, "t-sm dimt");
+    el("line", { x1, y1: y - t, x2: x1, y2: y + t, class: "dim" }, g);
+    el("line", { x1: x2, y1: y - t, x2, y2: y + t, class: "dim" }, g);
+    label(g, (x1 + x2) / 2, y - t * 2, txt, "t-sm dimt");
   }
-  function dimV(g, y1, y2, x, txt) {
+  function dimV(g, y1, y2, x, txt, t) {
+    t = t || 4;
     el("line", { x1: x, y1, x2: x, y2, class: "dim" }, g);
-    el("line", { x1: x - 3, y1, x2: x + 3, y2: y1, class: "dim" }, g);
-    el("line", { x1: x - 3, y1: y2, x2: x + 3, y2, class: "dim" }, g);
-    const t = label(g, x + 5, (y1 + y2) / 2, txt, "t-sm dimt", "start");
-    return t;
+    el("line", { x1: x - t, y1, x2: x + t, y2: y1, class: "dim" }, g);
+    el("line", { x1: x - t, y1: y2, x2: x + t, y2, class: "dim" }, g);
+    label(g, x + t * 1.6, (y1 + y2) / 2, txt, "t-sm dimt", "start");
   }
 
-  // ---- Plot interior (local coords: origin = plot centre, +z toward road for south plots) ----
-  function plotInterior(g, cx, cz, flip, detail) {
-    const s = flip ? -1 : 1; // road side is at +d/2 for south plots (flip=false means road at top? handled below)
-    // Road edge: for south plots the road is at lower z (top in drawing). For north plots, higher z.
-    // Local "depth" r measured from road edge into the plot.
-    const roadEdge = cz + (flip ? PLOT_D / 2 : -PLOT_D / 2);
-    const dir = flip ? -1 : 1;
+  // ---- Plot interior. Depth r is measured from the road edge into the plot. ----
+  const SLOT = 18, SLOT_GAP = 8, SLOT_MARGIN = 8, HOUSE = 64;
+  function plotInterior(g, cx, cz, roadAtHigherZ, detail) {
+    const roadEdge = cz + (roadAtHigherZ ? PLOT_D / 2 : -PLOT_D / 2);
+    const dir = roadAtHigherZ ? -1 : 1;
     const at = (lx, r, w, d) => ({ x: cx - PLOT_W / 2 + lx + w / 2, z: roadEdge + dir * (r + d / 2), w, d });
-    // fence + gate
-    rect(g, Object.assign(at(0, 0, PLOT_W, 2), { fill: C.building }));
-    rect(g, Object.assign(at(30, 0, 12, 2), { fill: C.gold, title: "Gate: ClaimPrompt + Nameplate" }));
-    // slots: 2 rows of 4, 12x12, gap 6, margin 3
+    rect(g, Object.assign(at(0, 0, PLOT_W, 3), { fill: C.building }));
+    rect(g, Object.assign(at(PLOT_W / 2 - 10, 0, 20, 3), { fill: C.gold, title: "Gate: ClaimPrompt + Nameplate" }));
     let n = 1;
-    [6, 22].forEach(r => {
+    [10, 36].forEach(r => {
       for (let i = 0; i < 4; i++) {
-        const o = at(3 + i * 18, r, 12, 12);
-        rect(g, Object.assign(o, { fill: C.concrete, title: "Slot" + n }), { stroke: "var(--ink)", "stroke-width": .3, "stroke-opacity": .4 });
+        const o = at(SLOT_MARGIN + i * (SLOT + SLOT_GAP), r, SLOT, SLOT);
+        rect(g, Object.assign(o, { fill: C.concrete, title: "Slot" + n + " (18 x 18)" }), { stroke: "var(--ink)", "stroke-width": .4, "stroke-opacity": .4 });
         if (detail) label(g, o.x, o.z, String(n), "t-md");
         n++;
       }
     });
-    // house zone 40x40
-    const house = at(16, 38, 40, 40);
-    rect(g, Object.assign(house, { fill: C.paper, title: "HouseAnchor: max footprint 40 x 40" }), { stroke: "var(--ink)", "stroke-width": .6, "stroke-dasharray": "2 1.5" });
-    if (detail) label(g, house.x, house.z, "House 40×40", "t-md");
-    // car pad + heli pad
-    const car = at(2, 40, 12, 20);
-    rect(g, Object.assign(car, { fill: C.asphalt, title: "CarPad (house level 6+)" }));
-    const heli = at(58, 40, 13, 13);
-    rect(g, Object.assign(heli, { fill: C.asphalt, title: "HeliPad (house level 9+)" }));
-    el("circle", { cx: heli.x, cy: heli.z, r: 4.5, fill: "none", stroke: "var(--gold)", "stroke-width": .8 }, g);
-    if (detail) {
-      label(g, car.x, car.z, "Car", "t-sm");
-      label(g, heli.x, heli.z + 9, "Heli", "t-sm");
-    }
-    return { house, car, heli, roadEdge, dir, at };
+    const house = at((PLOT_W - HOUSE) / 2, 62, HOUSE, HOUSE);
+    rect(g, Object.assign(house, { fill: C.paper, title: "HouseAnchor: max footprint 64 x 64" }), { stroke: "var(--ink)", "stroke-width": .8, "stroke-dasharray": "3 2" });
+    if (detail) label(g, house.x, house.z, "House 64×64", "t-md");
+    const car = at(4, 66, 16, 28);
+    rect(g, Object.assign(car, { fill: C.asphalt, title: "CarPad 16 x 28 (house level 6+)" }));
+    const heli = at(PLOT_W - 23, 66, 22, 22);
+    rect(g, Object.assign(heli, { fill: C.asphalt, title: "HeliPad 22 x 22 (house level 9+)" }));
+    el("circle", { cx: heli.x, cy: heli.z, r: 7.5, fill: "none", stroke: "var(--gold)", "stroke-width": 1.2 }, g);
+    if (detail) { label(g, car.x, car.z, "Car", "t-sm"); label(g, heli.x, heli.z + 16, "Heli", "t-sm"); }
   }
 
   // ---- Street plan ----
   (function drawPlan() {
-    const W = 600, H = 300;
-    const svg = el("svg", { viewBox: `${-W / 2} ${-H / 2} ${W} ${H}`, role: "img", "aria-label": "Top view of Skid Row: eight plots along a street with the auction stage in a central plaza" });
+    const W = 940, H = 484;
+    const svg = el("svg", { viewBox: `${-W / 2} ${-H / 2} ${W} ${H}`, role: "img", "aria-label": "Top view of Skid Row: eight large plots along a street with the auction stage in a central plaza" });
     rect(svg, { x: 0, z: 0, w: W, d: H, fill: C.grass });
-    // alleys
-    [-1, 1].forEach(s => rect(svg, { x: 0, z: s * 114, w: 580, d: 8, fill: C.concrete, title: "Alley (8 wide) with chain-link fence" }));
+    [-1, 1].forEach(s => rect(svg, { x: 0, z: s * ALLEY_Z, w: PLAY_W, d: 12, fill: C.concrete, title: "Alley (12 wide) with chain-link fence" }));
     backdrop.forEach(b => rect(svg, Object.assign({}, b, { title: `Backdrop building, ${b.h} studs tall` })));
-    // street + sidewalks + plaza
     objects.slice(0, 4).forEach(o => rect(svg, Object.assign({}, o, { title: o.what })));
-    // plots
     plots.forEach(p => {
       rect(svg, { x: p.x, z: p.z, w: PLOT_W, d: PLOT_D, fill: C.dirt, title: p.name });
       plotInterior(svg, p.x, p.z, p.north, false);
-      label(svg, p.x, p.z + (p.north ? -34 : 34), p.name, "t-lg");
+      label(svg, p.x, p.z + (p.north ? -36 : 36), p.name, "t-lg");
     });
-    // gameplay objects
     objects.slice(4).forEach(o => { if (!o.hidden) rect(svg, Object.assign({}, o, { title: o.what })); });
-    label(svg, 0, -64, "STAGE", "t-lg");
-    label(svg, 0, -88, "Jumbotron", "t-sm");
-    label(svg, -30, -40, "Rescue", "t-sm");
-    label(svg, 0, 88, "Hall of Fallen Millionaires", "t-sm");
-    label(svg, -258, -8, "SPAWN", "t-lg");
-    label(svg, -258, 52, "Daily kiosk", "t-sm");
-    label(svg, 262, -26, "Rebirth gate", "t-sm", "end");
+    label(svg, 0, -110, "STAGE", "t-lg");
+    label(svg, 0, -145, "Jumbotron", "t-sm");
+    label(svg, -48, -66, "Rescue", "t-sm");
+    label(svg, 0, 138, "Hall of Fallen Millionaires", "t-sm");
+    label(svg, -390, -10, "SPAWN", "t-lg");
+    label(svg, -390, 80, "Daily kiosk", "t-sm");
+    label(svg, 420, -40, "Rebirth gate", "t-sm", "end");
     label(svg, 0, 0, "PLAZA", "t-md");
-    label(svg, -150, 0, "Street (no traffic)", "t-sm");
-    label(svg, 0, 140, "Backdrop buildings 34–56 tall", "t-sm");
-    // grid
+    label(svg, -210, 0, "Street (no traffic)", "t-sm");
+    label(svg, 0, 222, "Backdrop buildings 44–80 tall", "t-sm");
     const grid = el("g", { id: "grid-layer" }, svg);
-    for (let x = -296; x <= 296; x += 8) el("line", { x1: x, y1: -H / 2, x2: x, y2: H / 2, stroke: "var(--grid)", "stroke-width": .5 }, grid);
-    for (let z = -144; z <= 144; z += 8) el("line", { x1: -W / 2, y1: z, x2: W / 2, y2: z, stroke: "var(--grid)", "stroke-width": .5 }, grid);
-    // dims
+    for (let x = -464; x <= 464; x += 16) el("line", { x1: x, y1: -H / 2, x2: x, y2: H / 2, stroke: "var(--grid)", "stroke-width": .6 }, grid);
+    for (let z = -224; z <= 224; z += 16) el("line", { x1: -W / 2, y1: z, x2: W / 2, y2: z, stroke: "var(--grid)", "stroke-width": .6 }, grid);
     const dims = el("g", { id: "dims-layer" }, svg);
-    dimH(dims, -290, 290, -146 + 6, "580 play area");
-    dimH(dims, -208, -136, 8 - 2 + 20, "72");
-    dimH(dims, -48, 48, 28 - 2, "plaza 96");
-    dimV(dims, -104, -24, -222 + 2, "80");
-    dimV(dims, -14, 14, -222 + 2, "28");
+    dimH(dims, -PLAY_W / 2, PLAY_W / 2, -224, "900 play area");
+    dimH(dims, -outer - PLOT_W / 2, -outer + PLOT_W / 2, FRONT - 4, "112");
+    dimH(dims, -PLAZA_HALF, PLAZA_HALF, FRONT - 4, "plaza 160");
+    dimV(dims, -(FRONT + PLOT_D), -FRONT, -outer - PLOT_W / 2 - 14, "128");
+    dimV(dims, -ROAD / 2, ROAD / 2, -outer - PLOT_W / 2 - 14, "40");
     document.getElementById("plan").appendChild(svg);
   })();
 
   // ---- Plot detail ----
   (function drawPlot() {
-    const svg = el("svg", { viewBox: "-50 -52 100 104", role: "img", "aria-label": "One plot, 72 by 80 studs, with 8 slot pads, house zone, car pad and helicopter pad" });
-    rect(svg, { x: 0, z: 0, w: 100, d: 104, fill: C.grass });
-    rect(svg, { x: 0, z: -48, w: 100, d: 8, fill: C.concrete });
-    label(svg, 0, -48, "sidewalk / street side", "t-md");
+    const svg = el("svg", { viewBox: "-76 -82 152 164", role: "img", "aria-label": "One plot, 112 by 128 studs, with 8 slot pads, house zone, car pad and helicopter pad" });
+    rect(svg, { x: 0, z: 0, w: 152, d: 164, fill: C.grass });
+    rect(svg, { x: 0, z: -74, w: 152, d: 14, fill: C.concrete });
+    label(svg, 0, -74, "sidewalk / street side", "t-md");
     rect(svg, { x: 0, z: 0, w: PLOT_W, d: PLOT_D, fill: C.dirt });
     plotInterior(svg, 0, 0, false, true);
     const d = el("g", {}, svg);
-    dimH(d, -36, 36, 45, "72");
-    dimV(d, -40, 40, 38, "80");
+    dimH(d, -56, 56, 72, "112", 3);
+    dimV(d, -64, 64, 62, "128", 3);
     document.getElementById("plot").appendChild(svg);
   })();
 
   // ---- World view ----
   (function drawWorld() {
-    const svg = el("svg", { viewBox: "-720 -720 1440 1440", role: "img", "aria-label": "World map: street in the centre, city buffer, fields, mountain ring at 450 to 700 studs" });
-    rect(svg, { x: 0, z: 0, w: 1440, d: 1440, fill: C.rock });
-    // mountain ring: draw jagged peaks as circles of decreasing size
-    const peaks = [];
-    for (let i = 0; i < 28; i++) {
-      const a = i / 28 * Math.PI * 2;
-      const r = 520 + ((i * 37) % 7) * 22;
-      peaks.push({ x: Math.cos(a) * r, z: Math.sin(a) * r, s: 70 + ((i * 53) % 5) * 14 });
+    const svg = el("svg", { viewBox: "-1020 -1020 2040 2040", role: "img", "aria-label": "World map: street in the centre, city buffer, fields, mountain ring at 750 to 950 studs" });
+    rect(svg, { x: 0, z: 0, w: 2040, d: 2040, fill: C.rock });
+    el("circle", { cx: 0, cy: 0, r: 700, fill: C.grass }, svg);
+    for (let i = 0; i < 32; i++) {
+      const a = i / 32 * Math.PI * 2;
+      const r = 780 + ((i * 37) % 7) * 26;
+      el("circle", { cx: Math.cos(a) * r, cy: Math.sin(a) * r, r: 100 + ((i * 53) % 5) * 20, fill: "var(--rock)", stroke: "var(--paper)", "stroke-opacity": .25, "stroke-width": 6 }, svg);
     }
-    el("circle", { cx: 0, cy: 0, r: 470, fill: C.grass }, svg);
-    peaks.forEach(p => el("circle", { cx: p.x, cy: p.z, r: p.s, fill: "var(--rock)", stroke: "var(--paper)", "stroke-opacity": .25, "stroke-width": 4 }, svg));
-    el("circle", { cx: 0, cy: 0, r: 300, fill: "none", stroke: "var(--ink)", "stroke-opacity": .25, "stroke-width": 3, "stroke-dasharray": "14 10" }, svg);
-    // city buffer
-    rect(svg, { x: 0, z: 0, w: 640, d: 330, fill: C.building });
-    rect(svg, { x: 0, z: 0, w: 580, d: 240, fill: C.dirt });
-    rect(svg, { x: 0, z: 0, w: 580, d: 28, fill: C.asphalt });
-    rect(svg, { x: 0, z: -64, w: 40, d: 24, fill: C.accent });
-    label(svg, 0, 40, "Play area 580 × 240", "t-lg");
-    label(svg, 0, -205, "Backdrop city + alleys", "t-lg");
-    label(svg, 0, -360, "Fields, rolling ±6", "t-lg");
-    label(svg, 0, 330, "Invisible wall r ≈ 300", "t-lg");
-    label(svg, 0, -620, "Mountains 150–300 tall", "t-lg");
+    rect(svg, { x: 0, z: 0, w: 1000, d: 480, fill: C.building });
+    rect(svg, { x: 0, z: 0, w: PLAY_W, d: PLAY_D, fill: C.dirt });
+    rect(svg, { x: 0, z: 0, w: PLAY_W, d: ROAD, fill: C.asphalt });
+    rect(svg, { x: 0, z: -110, w: 64, d: 36, fill: C.accent });
+    label(svg, 0, 70, "Play area 900 × 360", "t-lg");
+    label(svg, 0, -290, "Backdrop city + alleys", "t-lg");
+    label(svg, 0, -520, "Fields, rolling ±8", "t-lg");
+    label(svg, 0, 400, "Invisible walls at play-area edge", "t-lg");
+    label(svg, 0, -900, "Mountains 200–400 tall", "t-lg");
     document.getElementById("world").appendChild(svg);
   })();
 
@@ -439,7 +423,6 @@ svg text.dimt { fill: var(--accent); }
     });
   })();
 
-  // ---- Legend + toggles ----
   const legend = [["Street", "--asphalt"], ["Sidewalk / slot pad", "--concrete"], ["Plaza", "--brick"], ["Plot ground", "--dirt"], ["Stage", "--accent"], ["Kiosk / gate", "--gold"], ["Buildings", "--building"], ["Grass", "--grass"]];
   document.getElementById("legend").innerHTML = legend.map(([t, v]) => `<span><i style="background:var(${v})"></i>${t}</span>`).join("");
   document.getElementById("toggle-grid").addEventListener("change", e => { document.getElementById("grid-layer").style.opacity = e.target.checked ? 1 : 0; });
