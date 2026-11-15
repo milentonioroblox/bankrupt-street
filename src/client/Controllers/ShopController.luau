@@ -2,6 +2,10 @@
 -- Greybox shop (GDD §16 `UpgradeHouse`, `PropertyShop`, plus selling owned properties).
 -- Prices shown come from the shared Config; the server re-checks everything on each request.
 -- Toggle with the SHOP button or the B key. Replaced by ForgeGUI screens later.
+--
+-- Rent safety (v1.1 §4): if a purchase would leave the player unable to pay the next rent
+-- (spendable after the purchase + income until the tick < rent with the new holdings), ask
+-- "You won't be able to pay rent in M:SS" with Confirm / Cancel first.
 
 local ContextActionService = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
@@ -20,6 +24,9 @@ local player = Players.LocalPlayer
 local money = ClientState.money
 local panelFrame: Frame
 local list: ScrollingFrame
+local confirmFrame: Frame
+local confirmText: TextLabel
+local confirmAction: (() -> ())? = nil
 local busy = false
 
 local DARK = Color3.fromRGB(30, 24, 20)
@@ -49,26 +56,39 @@ local function text(parent: Instance, s: string, pos: UDim2, size: UDim2, align:
 	return l
 end
 
-local function button(parent: Instance, s: string, color: Color3, enabled: boolean, onClick: () -> ()): TextButton
+-- Buttons whose enabled state depends on cash; refreshed in place on every state push so the
+-- list isn't rebuilt (rebuilding under the mouse would swallow clicks).
+local refreshers: { () -> () } = {}
+
+local function button(parent: Instance, s: string, color: Color3, enabled: () -> boolean, onClick: () -> ()): TextButton
 	local b = Instance.new("TextButton")
 	b.Name = "Action"
 	b.AnchorPoint = Vector2.new(1, 0.5)
 	b.Position = UDim2.new(1, -8, 0.5, 0)
 	b.Size = UDim2.new(0, 120, 0, 30)
-	b.BackgroundColor3 = if enabled then color else GREY
-	b.AutoButtonColor = enabled
 	b.Font = Enum.Font.GothamBold
 	b.TextColor3 = Color3.new(1, 1, 1)
 	b.TextScaled = true
 	b.Text = s
 	corner(b)
+	local function refresh()
+		local on = enabled()
+		b.BackgroundColor3 = if on then color else GREY
+		b.AutoButtonColor = on
+	end
+	refresh()
+	table.insert(refreshers, refresh)
 	b.Parent = parent
 	b.Activated:Connect(function()
-		if enabled and not busy then
+		if enabled() and not busy then
 			onClick()
 		end
 	end)
 	return b
+end
+
+local function never(): boolean
+	return false
 end
 
 local function row(order: number, height: number?, name: string?): Frame
@@ -101,17 +121,63 @@ local function send(name: string, payload: { [string]: any }?, okText: string?)
 	end
 end
 
+-- Ask before a purchase that would leave the player short at the next rent tick.
+-- `holdings` is what they'd own afterwards; `cost` what it takes from spendable cash.
+local function withRentCheck(cost: number, holdings: any, go: () -> ())
+	local s = ClientState.state
+	if not s then
+		return
+	end
+	local rent, secondsLeft = ClientState.projectedRent(holdings)
+	local expected = s.spendable - cost + s.incomePerMinute / 60 * secondsLeft
+	if expected >= rent then
+		go()
+		return
+	end
+	confirmText.Text = `You won't be able to pay rent in {ClientState.clock(secondsLeft)}.\n`
+		.. `Rent will be {money(rent)}; you'd have about {money(math.max(0, expected))}.`
+	confirmAction = go
+	confirmFrame.Visible = true
+end
+
+-- What the list's rows depend on. Cash isn't part of it: cash only changes button states.
+local function structureKey(): string
+	local s = ClientState.state
+	if not s then
+		return ""
+	end
+	local ids = {}
+	for _, inst in s.properties do
+		table.insert(ids, `{inst.instanceId}@{inst.slotIndex}:{inst.boundUntil > s.serverTime}`)
+	end
+	table.sort(ids)
+	return `{s.houseLevel}|{s.streetTier}|{s.slotsMax}|{table.concat(ids, ",")}`
+end
+local renderedKey = ""
+
+local function canAfford(cost: number): () -> boolean
+	return function()
+		local now = ClientState.state
+		return now ~= nil and now.spendable >= cost
+	end
+end
+
+local function always(): boolean
+	return true
+end
+
 local function render()
 	for _, child in list:GetChildren() do
 		if child:IsA("Frame") then
 			child:Destroy()
 		end
 	end
+	table.clear(refreshers)
+	renderedKey = structureKey()
 	local s = ClientState.state
 	if not s then
 		return
 	end
-	local spendable = s.spendable
 	local order = 0
 	local function nextOrder(): number
 		order += 1
@@ -133,8 +199,11 @@ local function render()
 			UDim2.new(0, 10, 0, 6),
 			UDim2.new(1, -150, 1, -12)
 		)
-		button(f, "UPGRADE", GOLD, spendable >= cost, function()
-			send(Remotes.UpgradeHouse, {}, `Moved up to {Config.HouseDisplayNames[target]}!`)
+		button(f, "UPGRADE", GOLD, canAfford(cost), function()
+			local after = { houseLevel = target, streetTier = s.streetTier, properties = s.properties }
+			withRentCheck(cost, after, function()
+				send(Remotes.UpgradeHouse, {}, `Moved up to {Config.HouseDisplayNames[target]}!`)
+			end)
 		end)
 	end
 
@@ -150,12 +219,17 @@ local function render()
 				UDim2.new(1, -150, 1, -12)
 			)
 			if s.houseLevel < def.minHouse then
-				button(r, `Needs {Config.HouseDisplayNames[def.minHouse]}`, GREY, false, function() end)
+				button(r, `Needs {Config.HouseDisplayNames[def.minHouse]}`, GREY, never, function() end)
 			elseif s.slotsUsed >= s.slotsMax then
-				button(r, "No slot", GREY, false, function() end)
+				button(r, "No slot", GREY, never, function() end)
 			else
-				button(r, "BUY", GREEN, spendable >= def.cost, function()
-					send(Remotes.BuyProperty, { propertyId = def.id }, `Bought a {def.name}.`)
+				button(r, "BUY", GREEN, canAfford(def.cost), function()
+					local props = table.clone(s.properties) :: { any }
+					table.insert(props, { propertyId = def.id })
+					local after = { houseLevel = s.houseLevel, streetTier = s.streetTier, properties = props }
+					withRentCheck(def.cost, after, function()
+						send(Remotes.BuyProperty, { propertyId = def.id }, `Bought a {def.name}.`)
+					end)
 				end)
 			end
 		end
@@ -175,9 +249,15 @@ local function render()
 				text(r, `Slot {inst.slotIndex}: {def.name}`, UDim2.new(0, 10, 0, 6), UDim2.new(1, -150, 1, -12))
 				local price = Formulas.sellPrice(def.cost, Config.SellBackRatio)
 				local bound = inst.boundUntil > s.serverTime
-				button(r, if bound then "Bound" else `Sell {money(price)}`, RED, not bound, function()
-					send(Remotes.SellProperty, { instanceId = inst.instanceId }, `Sold for {money(price)}.`)
-				end)
+				button(
+					r,
+					if bound then "Bound" else `Sell {money(price)}`,
+					RED,
+					if bound then never else always,
+					function()
+						send(Remotes.SellProperty, { instanceId = inst.instanceId }, `Sold for {money(price)}.`)
+					end
+				)
 			end
 		end
 	end
@@ -234,13 +314,60 @@ function ShopController.Init(_self: any)
 	layout.Parent = list
 	list.Parent = panelFrame
 
+	confirmFrame = Instance.new("Frame")
+	confirmFrame.Name = "RentWarning"
+	confirmFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+	confirmFrame.Position = UDim2.fromScale(0.5, 0.45)
+	confirmFrame.Size = UDim2.new(0, 420, 0, 180)
+	confirmFrame.BackgroundColor3 = DARK
+	confirmFrame.Visible = false
+	confirmFrame.ZIndex = 5
+	corner(confirmFrame)
+	confirmText = text(confirmFrame, "", UDim2.new(0, 16, 0, 14), UDim2.new(1, -32, 0, 90), Enum.TextXAlignment.Center)
+	confirmText.TextColor3 = Color3.fromRGB(255, 140, 120)
+	local function choice(name: string, label: string, color: Color3, x: number, onClick: () -> ())
+		local b = Instance.new("TextButton")
+		b.Name = name
+		b.AnchorPoint = Vector2.new(0.5, 1)
+		b.Position = UDim2.new(x, 0, 1, -14)
+		b.Size = UDim2.new(0, 150, 0, 40)
+		b.BackgroundColor3 = color
+		b.Font = Enum.Font.GothamBold
+		b.TextColor3 = Color3.new(1, 1, 1)
+		b.TextScaled = true
+		b.Text = label
+		corner(b)
+		b.Parent = confirmFrame
+		b.Activated:Connect(onClick)
+	end
+	choice("Confirm", "Buy anyway", RED, 0.28, function()
+		confirmFrame.Visible = false
+		local go = confirmAction
+		confirmAction = nil
+		if go then
+			go()
+		end
+	end)
+	choice("Cancel", "Cancel", GREY, 0.72, function()
+		confirmFrame.Visible = false
+		confirmAction = nil
+	end)
+	confirmFrame.Parent = gui
+
 	gui.Parent = player:WaitForChild("PlayerGui")
 end
 
 function ShopController.Start(_self: any)
 	ClientState.changed:Connect(function()
-		if panelFrame.Visible then
+		if not panelFrame.Visible then
+			return
+		end
+		if structureKey() ~= renderedKey then
 			render()
+		else
+			for _, refresh in refreshers do
+				refresh()
+			end
 		end
 	end)
 	ContextActionService:BindAction("ToggleShop", function(_, state)

@@ -49,6 +49,20 @@ ProfileManager.usingMockStore = false
 
 local sessions: { [Player]: Session } = {}
 local loadedCallbacks: { (Player, Types.Profile) -> () } = {}
+local leavingCallbacks: { (Player, Types.Profile) -> () } = {}
+
+-- True once the server started shutting down (players leaving then didn't choose to).
+ProfileManager.shuttingDown = false
+
+-- Run the leave hooks synchronously, before the final save, so their changes are saved.
+local function runLeaving(player: Player, profile: Types.Profile)
+	for _, cb in leavingCallbacks do
+		local ok, err = pcall(cb, player, profile)
+		if not ok then
+			warn(`[ProfileManager] leave hook failed for {player.UserId}: {err}`)
+		end
+	end
+end
 
 local function keyFor(userId: number): string
 	return Config.DataStoreKeyPrefix .. tostring(userId)
@@ -229,6 +243,8 @@ local function publicSlice(profile: Types.Profile): Types.StateSlice
 		slotsMax = Config.HousePropertySlots[profile.houseLevel] or 0,
 		properties = props,
 		comebackUntil = profile.comebackBoostUntil,
+		rentFreeUntil = profile.rentFreeUntil,
+		insuranceCharges = profile.insuranceCharges,
 	}
 end
 
@@ -275,6 +291,9 @@ local function onPlayerRemoving(player: Player)
 	if not s then
 		return
 	end
+	if not s.closed then
+		runLeaving(player, s.profile)
+	end
 	release(s)
 	sessions[player] = nil
 	print(`[ProfileManager] {player.Name} saved and released, cash {s.profile.cash}`)
@@ -298,6 +317,12 @@ function ProfileManager.waitFor(player: Player, timeout: number?): Types.Profile
 		task.wait(0.1)
 	end
 	return nil
+end
+
+-- Called when a player leaves, before their profile is saved and released. Must not yield.
+-- Also runs for players removed by a shutdown: check ProfileManager.shuttingDown.
+function ProfileManager.onLeaving(cb: (Player, Types.Profile) -> ())
+	table.insert(leavingCallbacks, cb)
 end
 
 function ProfileManager.onLoaded(cb: (Player, Types.Profile) -> ())
@@ -341,6 +366,7 @@ function ProfileManager.debugRelog(player: Player): (number?, number?)
 	if not s then
 		return nil, nil
 	end
+	runLeaving(player, s.profile)
 	local before = s.profile.cash
 	release(s)
 	sessions[player] = nil
@@ -368,6 +394,7 @@ function ProfileManager.Start(_self: any)
 	end
 
 	game:BindToClose(function()
+		ProfileManager.shuttingDown = true
 		local pending = 0
 		for _, s in sessions do
 			pending += 1

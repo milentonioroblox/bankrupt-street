@@ -43,6 +43,22 @@ Enums.Push = table.freeze({
 	State = "State",
 	Notice = "Notice",
 	OfflineIncome = "OfflineIncome", -- { amount, seconds }
+	Rent = "Rent", -- { status: RentStatus, amount, crash }
+})
+
+-- Market Crash phase, replicated as ReplicatedStorage attribute CrashPhase.
+Enums.CrashPhase = table.freeze({
+	None = "none",
+	Warning = "warning", -- CrashWarningSeconds before the window
+	Live = "live",
+})
+
+-- Outcome of one rent collection for one player (GDD §6.3).
+Enums.RentStatus = table.freeze({
+	Paid = "paid",
+	Waived = "waived", -- rentFreeUntil
+	Insured = "insured", -- Crash Insurance covered the shortfall
+	Failed = "failed", -- goes to auction
 })
 
 -- Error codes used in NetResult.code (Appendix B).

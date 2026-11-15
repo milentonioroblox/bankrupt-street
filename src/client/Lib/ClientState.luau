@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Enums = require(Shared.Enums)
+local RentMath = require(Shared.RentMath)
 local Remotes = require(Shared.Remotes)
 local Types = require(Shared.Types)
 
@@ -52,6 +53,40 @@ task.spawn(function()
 		setState(result.data)
 	end
 end)
+
+-- Server clock (unix seconds, synced).
+function ClientState.now(): number
+	return workspace:GetServerTimeNow()
+end
+
+-- Next rent tick: (time, isCrashTick).
+function ClientState.nextRentTick(): (number, boolean)
+	local at = ReplicatedStorage:GetAttribute("RentNextAt") :: number? or 0
+	local startAt = ReplicatedStorage:GetAttribute("CrashStartAt") :: number? or 0
+	local endAt = ReplicatedStorage:GetAttribute("CrashEndAt") :: number? or 0
+	return at, RentMath.inCrashWindow(at, startAt, endAt)
+end
+
+-- Rent due at the next tick for the current holdings, or for `holdings` if given (to preview a
+-- purchase). Same formula as the server (Shared/RentMath). Returns (amount, secondsLeft, crash).
+function ClientState.projectedRent(holdings: RentMath.Holdings?): (number, number, boolean)
+	local s = ClientState.state
+	local at, crash = ClientState.nextRentTick()
+	local h: RentMath.Holdings? = holdings or (s :: any)
+	if not h then
+		return 0, 0, crash
+	end
+	local amount = RentMath.rent(h, crash, false)
+	if s and s.rentFreeUntil >= at then
+		amount = 0
+	end
+	return amount, math.max(0, at - ClientState.now()), crash
+end
+
+function ClientState.clock(seconds: number): string
+	seconds = math.max(0, math.floor(seconds))
+	return string.format("%d:%02d", seconds // 60, seconds % 60)
+end
 
 function ClientState.money(n: number): string
 	local s = tostring(math.floor(n))

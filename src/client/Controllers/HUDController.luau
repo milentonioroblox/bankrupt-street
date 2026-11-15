@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared.Config)
 local Enums = require(Shared.Enums)
 local ClientState = require(script.Parent.Parent.Lib.ClientState)
 
@@ -17,6 +18,7 @@ local player = Players.LocalPlayer
 local money = ClientState.money
 local cashLabel: TextLabel
 local infoLabel: TextLabel
+local clockLabel: TextLabel
 local noticeLabel: TextLabel
 local modal: Frame
 local modalText: TextLabel
@@ -72,6 +74,37 @@ local function renderInfo()
 		`+${rateText}/min   ·   {s.houseName}   ·   {plotText}   ·   {s.slotsUsed}/{s.slotsMax} slots{boost}`
 end
 
+local RED = Color3.fromRGB(255, 110, 100)
+local CREAM = Color3.fromRGB(255, 230, 160)
+
+-- "Next rent $145 in 3:12   ·   Crash in 14:20" (red during a crash or when short on cash).
+local function renderClocks()
+	local s = ClientState.state
+	if not s then
+		clockLabel.Text = ""
+		return
+	end
+	local now = ClientState.now()
+	local rent, rentIn, crashTick = ClientState.projectedRent()
+	local phase = ReplicatedStorage:GetAttribute("CrashPhase")
+	local startAt = ReplicatedStorage:GetAttribute("CrashStartAt") :: number? or now
+	local endAt = ReplicatedStorage:GetAttribute("CrashEndAt") :: number? or now
+	local clock = ClientState.clock
+	local mult = if crashTick then ` (×{Config.CrashRentMultiplier})` else ""
+	local rentText = `Next rent {money(rent)}{mult} in {clock(rentIn)}`
+	local crashText
+	if phase == Enums.CrashPhase.Live then
+		crashText = `CRASH LIVE {clock(endAt - now)}`
+	elseif phase == Enums.CrashPhase.Warning then
+		crashText = `CRASH IN {clock(startAt - now)}!`
+	else
+		crashText = `Crash in {clock(startAt - now)}`
+	end
+	clockLabel.Text = `{rentText}   ·   {crashText}`
+	local danger = phase ~= Enums.CrashPhase.None or s.spendable < rent
+	clockLabel.TextColor3 = if danger then RED else CREAM
+end
+
 function HUDController.notice(text: string)
 	noticeSerial += 1
 	local serial = noticeSerial
@@ -99,7 +132,8 @@ function HUDController.Init(_self: any)
 	cashLabel = panel(gui, "Cash", UDim2.new(0.5, 0, 0, 8), UDim2.new(0, 260, 0, 44))
 	cashLabel.TextColor3 = Color3.fromRGB(140, 230, 120)
 	infoLabel = panel(gui, "Info", UDim2.new(0.5, 0, 0, 56), UDim2.new(0, 560, 0, 26))
-	noticeLabel = panel(gui, "Notice", UDim2.new(0.5, 0, 0, 90), UDim2.new(0, 520, 0, 28))
+	clockLabel = panel(gui, "Clocks", UDim2.new(0.5, 0, 0, 86), UDim2.new(0, 560, 0, 26))
+	noticeLabel = panel(gui, "Notice", UDim2.new(0.5, 0, 0, 120), UDim2.new(0, 520, 0, 28))
 	noticeLabel.Visible = false
 
 	modal = Instance.new("Frame")
@@ -138,6 +172,15 @@ function HUDController.Start(_self: any)
 	ClientState.pushed:Connect(function(kind: string, data: any)
 		if kind == Enums.Push.Notice and type(data) == "string" then
 			HUDController.notice(data)
+		elseif kind == Enums.Push.Rent and type(data) == "table" then
+			if data.status == Enums.RentStatus.Paid then
+				local crash = if data.crash then ` (crash ×{Config.CrashRentMultiplier})` else ""
+				HUDController.notice(`Paid {money(data.amount)} rent{crash}.`)
+			elseif data.status == Enums.RentStatus.Waived then
+				HUDController.notice("RENT WAIVED")
+			elseif data.status == Enums.RentStatus.Insured then
+				HUDController.notice("Crash Insurance covered your rent.")
+			end
 		elseif kind == Enums.Push.OfflineIncome and type(data) == "table" then
 			showOffline(data.amount, data.seconds)
 		end
@@ -145,6 +188,7 @@ function HUDController.Start(_self: any)
 	RunService.RenderStepped:Connect(function()
 		local cash = predictedCash()
 		cashLabel.Text = if cash then money(cash) else "..."
+		renderClocks()
 	end)
 end
 

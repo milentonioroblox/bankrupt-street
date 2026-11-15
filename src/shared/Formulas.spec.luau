@@ -86,6 +86,17 @@ return function(): (number, number)
 	check("free slot gap", Formulas.firstFreeSlot({ [1] = true, [3] = true }, 3), 2)
 	check("free slot full", Formulas.firstFreeSlot({ [1] = true, [2] = true }, 2), nil)
 
+	-- RentMath with the live Config (v1.1: 5-minute cycle). Update if Config is retuned.
+	local RentMath = require(script.Parent.RentMath)
+	local shopStudio = { houseLevel = 4, streetTier = 1, properties = { { propertyId = "shop_corner" } } }
+	check("rentmath studio+shop", RentMath.rent(shopStudio, false, false), 145) -- 60*5*0.35 + 40
+	check("rentmath crash", RentMath.rent(shopStudio, true, false), 435)
+	check("rentmath crash+eviction", RentMath.rent(shopStudio, true, true), 870)
+	check("rentmath empty box", RentMath.rent({ houseLevel = 1, streetTier = 1, properties = {} }, false, false), 10)
+	check("crash window start excluded", RentMath.inCrashWindow(1200, 1200, 1500), false)
+	check("crash window end included", RentMath.inCrashWindow(1500, 1200, 1500), true)
+	check("crash window after", RentMath.inCrashWindow(1800, 1200, 1500), false)
+
 	check("valid amount", Formulas.isValidAmount(5), true)
 	check("invalid neg", Formulas.isValidAmount(-1), false)
 	check("invalid nan", Formulas.isValidAmount(0 / 0), false)

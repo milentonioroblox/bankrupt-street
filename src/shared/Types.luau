@@ -37,6 +37,7 @@ export type Profile = {
 	auctionBoostExpiresAt: number,
 	rentFreeUntil: number,
 	comebackBoostUntil: number,
+	crashRentPrepaidUntil: number, -- v1.1: crash rent already charged on leave, for ticks up to this time
 	fallenMillionaire: boolean,
 	houseHistory: { HistoryEntry },
 	streak: { count: number, lastClaimUTCDate: string, longest: number, claimed14: boolean, claimed28: boolean },
@@ -74,6 +75,8 @@ export type StateSlice = {
 	slotsMax: number,
 	properties: { PropertyView },
 	comebackUntil: number,
+	rentFreeUntil: number,
+	insuranceCharges: number,
 }
 
 -- A ModuleScript must return exactly one value.

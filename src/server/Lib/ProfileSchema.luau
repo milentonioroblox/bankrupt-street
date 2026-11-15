@@ -34,6 +34,7 @@ function ProfileSchema.default(userId: number, now: number): Types.Profile
 		auctionBoostExpiresAt = 0,
 		rentFreeUntil = 0,
 		comebackBoostUntil = 0,
+		crashRentPrepaidUntil = 0,
 		fallenMillionaire = false,
 		houseHistory = {},
 		streak = { count = 0, lastClaimUTCDate = "", longest = 0, claimed14 = false, claimed28 = false },

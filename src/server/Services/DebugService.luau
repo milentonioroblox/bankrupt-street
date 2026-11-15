@@ -2,7 +2,8 @@
 -- Debug commands (GDD §22 work order, §23). Studio, or group rank >= Config.AdminMinRank when
 -- Config.AdminGroupId is set. Every command is logged.
 --
--- Chat:  /givecash n   /setcash n   /sethouse n   /giveprop id   /save   /profile
+-- Chat:  /givecash n   /setcash n   /sethouse n   /giveprop id   /forcerent   /forcecrash [s]
+--        /giveitem insurance|lawyer   /save   /profile
 -- Studio test hook: ServerStorage.DebugHook (BindableFunction), so command-bar / MCP scripts
 -- can drive the live services: DebugHook:Invoke("givecash", userId, 500)
 
@@ -14,11 +15,13 @@ local TextChatService = game:GetService("TextChatService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local CrashService = require(script.Parent.CrashService)
 local EconomyService = require(script.Parent.EconomyService)
 local HouseService = require(script.Parent.HouseService)
 local PlotService = require(script.Parent.PlotService)
 local ProfileManager = require(script.Parent.ProfileManager)
 local PropertyService = require(script.Parent.PropertyService)
+local RentService = require(script.Parent.RentService)
 
 local DebugService = {}
 
@@ -71,6 +74,35 @@ local commands: { [string]: Command } = {
 		end
 		return `gave {id}`
 	end,
+	forcerent = function()
+		local counts = RentService.forceCollect()
+		local parts = {}
+		for status, n in counts do
+			table.insert(parts, `{status}={n}`)
+		end
+		return `rent collected: {table.concat(parts, " ")}`
+	end,
+	forcecrash = function(_, args)
+		local seconds = tonumber(args[1])
+		CrashService.force(if seconds and seconds > 0 then math.floor(seconds) else nil)
+		return "crash started"
+	end,
+	giveitem = function(player, args)
+		local profile = ProfileManager.get(player)
+		local item = args[1]
+		if not profile then
+			return "no profile"
+		elseif item == "insurance" then
+			profile.insuranceCharges += 1
+			profile.insuranceUsedUTCDate = ""
+		elseif item == "lawyer" then
+			profile.lawyerPasses += 1
+		else
+			return "usage: /giveitem insurance|lawyer"
+		end
+		ProfileManager.push(player)
+		return `gave {item}`
+	end,
 	save = function(player)
 		ProfileManager.saveNow(player)
 		return "saved"
@@ -80,7 +112,9 @@ local commands: { [string]: Command } = {
 		if not p then
 			return "no profile"
 		end
-		return `cash={p.cash} house={p.houseLevel} street={p.streetTier} plot={PlotService.getPlotId(player) or 0}`
+		return `cash={p.cash} insurance={p.insuranceCharges} prepaid={p.crashRentPrepaidUntil} house={p.houseLevel} street={p.streetTier} plot={PlotService.getPlotId(
+			player
+		) or 0}`
 	end,
 }
 
