@@ -94,6 +94,9 @@ request.OnServerInvoke = function(player: Player, name: any, payload: any): Type
 		warn(`[Net] {name} from {player.UserId} errored: {result}`)
 		return Net.fail("server_error", "Something went wrong.")
 	end
+	if type(result) ~= "table" then
+		return Net.ok(nil)
+	end
 	return result
 end
 

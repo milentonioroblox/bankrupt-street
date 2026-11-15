@@ -7,8 +7,12 @@ for _, module in script.Controllers:GetChildren() do
 	end
 end
 for _, c in controllers do
-	if c.Init then c:Init() end
+	if c.Init then
+		c:Init()
+	end
 end
 for _, c in controllers do
-	if c.Start then task.spawn(c.Start, c) end
+	if c.Start then
+		task.spawn(c.Start, c)
+	end
 end

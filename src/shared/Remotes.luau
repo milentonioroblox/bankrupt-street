@@ -11,6 +11,7 @@ local Remotes = {
 	StatePush = "StatePush",
 
 	-- Request names (M0 subset; add the rest of Appendix B as milestones land)
+	GetState = "GetState",
 	ClaimPlot = "ClaimPlot",
 	ReleasePlot = "ReleasePlot",
 }

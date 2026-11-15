@@ -21,9 +21,11 @@ export type Profile = {
 	createdAt: number,
 	lastSeenAt: number,
 	cash: number,
+	reservedCash: number, -- live auction escrow; always saved as 0 (GDD §17.3)
 	houseLevel: number,
 	streetTier: number,
 	rebirthCount: number,
+	rebirthIncomeMultiplier: number,
 	properties: { PropertyInstance },
 	pendingDeeds: { any },
 	pendingProperties: { PropertyInstance },
@@ -49,11 +51,22 @@ export type Profile = {
 	integrity: { [string]: any },
 }
 
--- Session lock stored next to the profile in the same DataStore key.
-export type SessionLock = { jobId: string, placeId: number, heartbeatAt: number }
+-- Session lock stored next to the profile in the same DataStore key, so the lock and the data
+-- are always written together by one UpdateAsync (no split-brain between two stores).
+export type SessionLock = { token: string, jobId: string, placeId: number, heartbeatAt: number }
 
 export type StoredRecord = { profile: Profile, lock: SessionLock? }
 
 export type NetResult = { ok: boolean, code: string?, message: string?, data: any? }
 
-return nil
+-- Public slice of the profile pushed to its owner only (never other players' cash).
+export type StateSlice = {
+	cash: number,
+	spendable: number,
+	houseLevel: number,
+	houseName: string,
+	streetTier: number,
+}
+
+-- A ModuleScript must return exactly one value.
+return {}

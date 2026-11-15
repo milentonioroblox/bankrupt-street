@@ -14,7 +14,18 @@ Config.AutosaveSeconds = 60
 Config.SessionLockTTL = 90
 Config.SessionLockHeartbeat = 30
 Config.SessionLockWaitSeconds = 10
+Config.SessionLockRetrySeconds = 1
+-- Studio only: a lock left by a crashed/killed playtest is stolen at once instead of after the TTL.
+Config.SessionLockStealInStudio = true
 Config.DataStoreName = "PlayerData_v1"
+Config.DataStoreKeyPrefix = "player:"
+Config.ProfileSaveMinIntervalSeconds = 6 -- DataStore allows one write per key per 6s
+Config.ProfileLoadAttempts = 3
+Config.ProfileSaveAttempts = 5
+Config.CloseSaveTimeoutSeconds = 25 -- BindToClose budget is 30s
+-- Studio only: use an in-memory store when DataStores are unavailable (unpublished place or
+-- "Enable Studio Access to API Services" off). Data then lives only for that playtest.
+Config.UseMockStoreInStudio = true
 
 Config.StartingCash = 150 -- v1.1 (was 75)
 Config.IncomeTickSeconds = 1
@@ -212,28 +223,149 @@ Config.SuggestedRobux = { -- suggestions only, not data
 }
 Config.StreakSaveIneligibleFallbackCash = 1000
 
-Config.Properties = {
-	{ id = "stall_street", name = "Street Stall", type = "Stall", cost = 50, incomePerMinute = 8, minHouse = 1, minStreet = 1 },
-	{ id = "stall_food", name = "Food Cart", type = "Stall", cost = 200, incomePerMinute = 15, minHouse = 2, minStreet = 1 },
-	{ id = "stall_kiosk", name = "Kiosk", type = "Stall", cost = 600, incomePerMinute = 30, minHouse = 3, minStreet = 1 },
-	{ id = "shop_corner", name = "Corner Shop", type = "Shop", cost = 2000, incomePerMinute = 60, minHouse = 4, minStreet = 1 },
-	{ id = "apt_studio", name = "Studio Apartment", type = "Apartment", cost = 5000, incomePerMinute = 80, minHouse = 4, minStreet = 2 },
-	{ id = "shop_boutique", name = "Boutique", type = "Shop", cost = 8000, incomePerMinute = 120, minHouse = 5, minStreet = 2 },
-	{ id = "apt_building", name = "Apartment Building", type = "Apartment", cost = 25000, incomePerMinute = 200, minHouse = 6, minStreet = 2 },
-	{ id = "shop_luxury", name = "Luxury Store", type = "Shop", cost = 30000, incomePerMinute = 250, minHouse = 6, minStreet = 2 },
-	{ id = "apt_tower", name = "Apartment Tower", type = "Apartment", cost = 120000, incomePerMinute = 500, minHouse = 8, minStreet = 3 },
-	{ id = "shop_mall", name = "Street Mall", type = "Shop", cost = 400000, incomePerMinute = 800, minHouse = 8, minStreet = 4 },
-	{ id = "apt_resort", name = "Island Resort", type = "Apartment", cost = 1500000, incomePerMinute = 2000, minHouse = 9, minStreet = 4 },
-	{ id = "shop_hq", name = "Corporate HQ", type = "Shop", cost = 6000000, incomePerMinute = 5000, minHouse = 10, minStreet = 5 },
+export type PropertyDef = {
+	id: string,
+	name: string,
+	type: string,
+	cost: number,
+	incomePerMinute: number,
+	minHouse: number,
+	minStreet: number,
 }
 
-Config.PropertiesById = {}
+Config.Properties = {
+	{
+		id = "stall_street",
+		name = "Street Stall",
+		type = "Stall",
+		cost = 50,
+		incomePerMinute = 8,
+		minHouse = 1,
+		minStreet = 1,
+	},
+	{
+		id = "stall_food",
+		name = "Food Cart",
+		type = "Stall",
+		cost = 200,
+		incomePerMinute = 15,
+		minHouse = 2,
+		minStreet = 1,
+	},
+	{
+		id = "stall_kiosk",
+		name = "Kiosk",
+		type = "Stall",
+		cost = 600,
+		incomePerMinute = 30,
+		minHouse = 3,
+		minStreet = 1,
+	},
+	{
+		id = "shop_corner",
+		name = "Corner Shop",
+		type = "Shop",
+		cost = 2000,
+		incomePerMinute = 60,
+		minHouse = 4,
+		minStreet = 1,
+	},
+	{
+		id = "apt_studio",
+		name = "Studio Apartment",
+		type = "Apartment",
+		cost = 5000,
+		incomePerMinute = 80,
+		minHouse = 4,
+		minStreet = 2,
+	},
+	{
+		id = "shop_boutique",
+		name = "Boutique",
+		type = "Shop",
+		cost = 8000,
+		incomePerMinute = 120,
+		minHouse = 5,
+		minStreet = 2,
+	},
+	{
+		id = "apt_building",
+		name = "Apartment Building",
+		type = "Apartment",
+		cost = 25000,
+		incomePerMinute = 200,
+		minHouse = 6,
+		minStreet = 2,
+	},
+	{
+		id = "shop_luxury",
+		name = "Luxury Store",
+		type = "Shop",
+		cost = 30000,
+		incomePerMinute = 250,
+		minHouse = 6,
+		minStreet = 2,
+	},
+	{
+		id = "apt_tower",
+		name = "Apartment Tower",
+		type = "Apartment",
+		cost = 120000,
+		incomePerMinute = 500,
+		minHouse = 8,
+		minStreet = 3,
+	},
+	{
+		id = "shop_mall",
+		name = "Street Mall",
+		type = "Shop",
+		cost = 400000,
+		incomePerMinute = 800,
+		minHouse = 8,
+		minStreet = 4,
+	},
+	{
+		id = "apt_resort",
+		name = "Island Resort",
+		type = "Apartment",
+		cost = 1500000,
+		incomePerMinute = 2000,
+		minHouse = 9,
+		minStreet = 4,
+	},
+	{
+		id = "shop_hq",
+		name = "Corporate HQ",
+		type = "Shop",
+		cost = 6000000,
+		incomePerMinute = 5000,
+		minHouse = 10,
+		minStreet = 5,
+	},
+} :: { PropertyDef }
+
+local propertiesById: { [string]: PropertyDef } = {}
 for _, p in Config.Properties do
-	Config.PropertiesById[p.id] = p
+	propertiesById[p.id] = p
 end
+Config.PropertiesById = propertiesById
 
 -- Studio/admin debug commands (GDD §23). Group rank gate for live servers; 0 disables.
 Config.AdminGroupId = 0
 Config.AdminMinRank = 254
+Config.RunFormulaSpecInStudio = true
+
+-- Greybox street layout (GDD §3.2, §21.3). Studs. Plots sit in two facing rows along the X axis
+-- with the auction stage in the middle of the road, so every plot can see the stage.
+Config.Map = {
+	PlotSize = 44,
+	PlotSpacing = 56, -- centre to centre along a row
+	RoadHalfWidth = 34, -- road centre to the front edge of each plot row
+	PropertySlotCount = 8, -- Slot1..Slot8 attachments per plot (max HousePropertySlots)
+	ClaimPromptDistance = 12,
+	StageSize = Vector3.new(28, 3, 18),
+	JumbotronSize = Vector3.new(24, 12, 1),
+	SpawnOffsetX = 40, -- spawn sits this far past the last plot, on the road
+}
 
 return Config

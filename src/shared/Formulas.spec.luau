@@ -1,7 +1,8 @@
 --!strict
 -- Formula checks from GDD Appendix C, using the v1.0 numbers passed in explicitly
--- (so tuning Config never breaks these). Run in Studio: the server runs them on start
--- (see DebugService) or call require(ReplicatedStorage.Shared["Formulas.spec"])().
+-- (so tuning Config never breaks these), plus v1.1 cases. In Studio the server runs this on
+-- start (DebugService, Config.RunFormulaSpecInStudio); or from the command bar:
+-- require(game.ReplicatedStorage.Shared["Formulas.spec"])()
 
 local Formulas = require(script.Parent.Formulas)
 
@@ -59,6 +60,25 @@ return function(): (number, number)
 
 	check("bankrupt drop", Formulas.houseLevelAfterBankruptcy(7, 3), 4)
 	check("bankrupt drop floor", Formulas.houseLevelAfterBankruptcy(2, 3), 1)
+
+	-- v1.1: 5-minute rent cycle, Skid Row, Street Stall + Food Cart on a Tent (HouseRent 5)
+	local v11 = table.clone(base)
+	v11.cycleMinutes = 5
+	v11.baseIncomePerMinute = 8 + 15
+	v11.houseRent = 5
+	check("rent v1.1 tent", Formulas.rent(v11), 45) -- 23*5*0.35 = 40.25 + 5 = 45.25 -> 45
+	local v11b = table.clone(v11)
+	v11b.baseIncomePerMinute = 8
+	v11b.houseRent = 0
+	check("rent v1.1 float edge", Formulas.rent(v11b), 14) -- 8*5*0.35 must not floor to 13
+	check("offline v1.1 half rate", Formulas.offlineCash(60, 28800, 28800, 0.5, 1), 14400)
+	check("offline v1.1 half rate vip", Formulas.offlineCash(60, 28800, 28800, 0.5, 2), 28800)
+
+	-- session lock (GDD §17.2)
+	check("lock free", Formulas.lockDecision(nil, 1000, "me", 90), "free")
+	check("lock mine", Formulas.lockDecision({ token = "me", heartbeatAt = 1 }, 1000, "me", 90), "mine")
+	check("lock held", Formulas.lockDecision({ token = "other", heartbeatAt = 950 }, 1000, "me", 90), "held")
+	check("lock stale", Formulas.lockDecision({ token = "other", heartbeatAt = 910 }, 1000, "me", 90), "stale")
 
 	check("valid amount", Formulas.isValidAmount(5), true)
 	check("invalid neg", Formulas.isValidAmount(-1), false)

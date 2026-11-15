@@ -7,8 +7,12 @@ for _, module in script.Services:GetChildren() do
 	end
 end
 for _, s in services do
-	if s.Init then s:Init() end
+	if s.Init then
+		s:Init()
+	end
 end
 for _, s in services do
-	if s.Start then task.spawn(s.Start, s) end
+	if s.Start then
+		task.spawn(s.Start, s)
+	end
 end
