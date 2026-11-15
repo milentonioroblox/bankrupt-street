@@ -11,7 +11,7 @@ A Roblox game built with Roblox Studio, Rojo, ForgeGUI (UI/art/audio generation)
 | `src/shared` | `ReplicatedStorage.Shared` |
 | `src/ui` | `ReplicatedStorage.UI` (ForgeGUI-generated UI modules) |
 | `assets/` | Source art/audio from ForgeGUI before upload |
-| `docs/` | Game design notes |
+| `docs/GDD.md` | Game design document (source of truth) |
 
 Server code lives in `src/server/Services/*` modules and client code in `src/client/Controllers/*`. Each module can expose `:Init()` and `:Start()`.
 
