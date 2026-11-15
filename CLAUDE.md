@@ -15,6 +15,7 @@ A Roblox game built with Roblox Studio, Rojo, ForgeGUI (UI/art/audio generation)
 | `docs/GDD-v1.1-changes.md` | Overrides to the GDD from the design review |
 | `docs/map/skid-row-map.html` | Skid Row greybox map plan (coordinates, part names) |
 | `docs/prompts/asset-pipeline.md` | Master prompt for ForgeGUI asset generation |
+| `docs/ui/ui-spec.html` | UI audit, corrected screens, colour tokens, Roblox UI build recipe |
 
 Server code lives in `src/server/Services/*` modules and client code in `src/client/Controllers/*`. Each module can expose `:Init()` and `:Start()`.
 

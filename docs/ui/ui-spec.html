@@ -1,0 +1,467 @@
+<title>Bankrupt Street UI Spec</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Archivo:wght@600;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: production spec sheet. Audit first, then the corrected screens as live 16:9 mockups, then tokens and the Roblox build recipe. */
+:root {
+  /* page chrome (theme-aware) */
+  --bg: #f2f1ee; --paper: #ffffff; --ink: #1d1e24; --muted: #5f6270; --rule: #dddbd5;
+  --blocker: #c8102e; --high: #d97706; --medium: #2563eb; --keep: #15803d;
+  --chip-bg: rgba(29,30,36,.06);
+  /* game tokens (fixed in both themes: they are the game's own colours) */
+  --g-outline: #1b1b2f;
+  --g-red-1: #ff4d4d; --g-red-2: #c8102e;
+  --g-gold-1: #ffe14d; --g-gold-2: #f5a300;
+  --g-green-1: #7cff5b; --g-green-2: #22b83a;
+  --g-blue-1: #5bc8ff; --g-blue-2: #1e6fe8;
+  --g-purple-1: #c77dff; --g-purple-2: #7b2ff7;
+  --g-pink-1: #ff6fd8; --g-pink-2: #e0218a;
+  --g-grey-1: #b4b9c0; --g-grey-2: #7a8089;
+  --g-cream: #fff4dc; --g-card: #ffe6b0; --g-line: #e0c48a; --g-cash: #ffd23f; --g-white: #ffffff;
+  --g-sky-1: #ffd9a8; --g-sky-2: #f6a46b; --g-street: #5a5560; --g-bld-1: #c98d63; --g-bld-2: #8f6a5a; --g-bld-3: #b7a089;
+  --font-game: "Fredoka", "Arial Rounded MT Bold", "Trebuchet MS", sans-serif;
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15161a; --paper: #1d1f24; --ink: #ecebe7; --muted: #a3a6b0; --rule: #33353c;
+    --blocker: #ff5a6e; --high: #f5a524; --medium: #6ea0ff; --keep: #4ade80; --chip-bg: rgba(236,235,231,.08);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15161a; --paper: #1d1f24; --ink: #ecebe7; --muted: #a3a6b0; --rule: #33353c;
+  --blocker: #ff5a6e; --high: #f5a524; --medium: #6ea0ff; --keep: #4ade80; --chip-bg: rgba(236,235,231,.08);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 72px;
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 48px; }
+header { display: grid; gap: 12px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--blocker); }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(30px, 5vw, 46px); line-height: 1.05; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-weight: 800; font-size: 24px; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--font-display); font-weight: 600; font-size: 17px; margin: 0; }
+p { margin: 0; max-width: 70ch; }
+.lede { color: var(--muted); font-size: 16px; }
+section { display: grid; gap: 16px; }
+.note { font-size: 14px; color: var(--muted); }
+.mono { font-family: var(--font-mono); font-size: 13px; }
+
+.verdict { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .verdict { grid-template-columns: 1fr; } }
+.verdict div { background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 16px; display: grid; gap: 4px; }
+.verdict b { font-family: var(--font-display); font-size: 15px; }
+.verdict span { font-size: 14px; color: var(--muted); }
+.verdict .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+
+.tablewrap { overflow-x: auto; background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+th { font-family: var(--font-mono); font-weight: 500; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+td.code { font-family: var(--font-mono); font-size: 12.5px; white-space: nowrap; }
+.sev { display: inline-block; font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; padding: 2px 8px; border-radius: 99px; border: 1px solid currentColor; white-space: nowrap; }
+.sev.blocker { color: var(--blocker); } .sev.high { color: var(--high); } .sev.medium { color: var(--medium); } .sev.keep { color: var(--keep); }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.filters button { font: 500 13px var(--font-body); color: var(--ink); background: var(--chip-bg); border: 1px solid var(--rule); border-radius: 99px; padding: 5px 12px; cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.filters button:focus-visible, .toggle input:focus-visible { outline: 2px solid var(--medium); outline-offset: 2px; }
+
+/* ---------- mockup frames ---------- */
+.screens { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 900px) { .screens { grid-template-columns: 1fr; } }
+figure { margin: 0; display: grid; gap: 8px; min-width: 0; }
+figcaption { display: grid; gap: 2px; }
+figcaption b { font-family: var(--font-display); font-size: 15px; }
+figcaption span { font-size: 13.5px; color: var(--muted); }
+.toggle { display: inline-flex; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); cursor: pointer; }
+
+.scr { container-type: inline-size; position: relative; aspect-ratio: 16 / 9; max-width: 100%; border-radius: 10px; overflow: hidden; border: 1px solid var(--rule);
+  font-family: var(--font-game); color: var(--g-white);
+  background:
+    linear-gradient(180deg, transparent 58%, var(--g-street) 58%),
+    linear-gradient(90deg, var(--g-bld-1) 0 12%, transparent 12% 16%, var(--g-bld-2) 16% 27%, transparent 27% 73%, var(--g-bld-3) 73% 84%, transparent 84% 88%, var(--g-bld-1) 88%),
+    linear-gradient(180deg, var(--g-sky-1), var(--g-sky-2));
+}
+.scr::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 120%, rgba(255,255,255,.18), transparent 60%); pointer-events: none; }
+.scr.crash::after { content: ""; position: absolute; inset: 0; background: rgba(200, 16, 46, .28); pointer-events: none; z-index: 0; }
+.scr > * { position: absolute; z-index: 1; }
+.dim-bg::before { background: rgba(10, 10, 20, .45); }
+
+/* safe zones overlay */
+.zone { display: none; border: .25cqw dashed rgba(255,255,255,.9); background: rgba(27,27,47,.35); border-radius: .8cqw; font: 600 1.25cqw var(--font-mono); color: #fff; padding: .6cqw; z-index: 5; }
+.show-zones .zone { display: block; }
+.z-roblox { left: 0; top: 0; width: 15%; height: 12%; }
+.z-stick { left: 0; bottom: 0; width: 30%; height: 42%; }
+.z-jump { right: 0; bottom: 0; width: 20%; height: 32%; }
+
+/* game components */
+.stroke { text-shadow: -.18cqw -.18cqw 0 var(--g-outline), .18cqw -.18cqw 0 var(--g-outline), -.18cqw .18cqw 0 var(--g-outline), .18cqw .18cqw 0 var(--g-outline), 0 .35cqw 0 var(--g-outline); }
+.gbtn { position: relative; border: .32cqw solid var(--g-outline); border-radius: 1.3cqw; box-shadow: 0 .45cqw 0 var(--g-outline); display: grid; place-items: center; text-align: center; line-height: 1; font-weight: 700; overflow: hidden; }
+.gbtn::after { content: ""; position: absolute; left: 6%; right: 6%; top: 6%; height: 42%; border-radius: 1cqw; background: linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,.08)); pointer-events: none; }
+.red { background: linear-gradient(180deg, var(--g-red-1), var(--g-red-2)); }
+.gold { background: linear-gradient(180deg, var(--g-gold-1), var(--g-gold-2)); }
+.green { background: linear-gradient(180deg, var(--g-green-1), var(--g-green-2)); }
+.blue { background: linear-gradient(180deg, var(--g-blue-1), var(--g-blue-2)); }
+.purple { background: linear-gradient(180deg, var(--g-purple-1), var(--g-purple-2)); }
+.pink { background: linear-gradient(180deg, var(--g-pink-1), var(--g-pink-2)); }
+.grey { background: linear-gradient(180deg, var(--g-grey-1), var(--g-grey-2)); }
+.ico { width: 3.6cqw; height: 3.6cqw; border-radius: 50%; background: rgba(255,255,255,.9); border: .25cqw solid var(--g-outline); margin-bottom: .5cqw; }
+
+.cash { left: 50%; top: 2.5%; transform: translateX(-50%); width: 28%; padding: .8cqw 1cqw 1cqw; background: var(--g-cream); border: .35cqw solid var(--g-outline); border-radius: 1.8cqw; box-shadow: 0 .5cqw 0 var(--g-outline); display: grid; justify-items: center; gap: .2cqw; }
+.cash .amt { font-size: 4.4cqw; font-weight: 700; color: var(--g-cash); }
+.cash .inc { font-size: 1.9cqw; font-weight: 700; color: var(--g-green-1); }
+.shield { right: -3.2cqw; top: 50%; transform: translateY(-50%); position: absolute; width: 5.4cqw; height: 6cqw; background: linear-gradient(180deg, var(--g-purple-1), var(--g-purple-2)); border: .3cqw solid var(--g-outline); border-radius: 1cqw 1cqw 2.6cqw 2.6cqw; display: grid; place-items: center; font-size: 1.1cqw; line-height: 1.05; text-align: center; font-weight: 700; }
+.shield b { font-size: 1.9cqw; display: block; }
+
+.timers { right: 2%; top: 2.5%; display: grid; gap: .8cqw; width: 19%; }
+.timer { display: flex; justify-content: space-between; align-items: center; padding: .7cqw 1.2cqw; border: .3cqw solid var(--g-outline); border-radius: 99px; background: #2b2d31; font-size: 1.8cqw; font-weight: 700; box-shadow: 0 .35cqw 0 var(--g-outline); }
+.timer.crash-t { box-shadow: 0 0 0 .3cqw var(--g-red-1), 0 .35cqw 0 var(--g-outline); }
+.timer.live { background: linear-gradient(180deg, var(--g-red-1), var(--g-red-2)); }
+.scr > .gbtn { position: absolute; }
+.store { right: 2%; top: 24%; width: 19%; height: 7%; font-size: 1.8cqw; }
+
+.side { right: 2%; top: 34%; display: grid; grid-template-columns: 1fr 1fr; gap: 1cqw; width: 19%; }
+.side .gbtn { aspect-ratio: 1; font-size: 1.45cqw; padding-top: .4cqw; }
+.badge { position: absolute; top: -.6cqw; right: -.6cqw; z-index: 2; width: 2.4cqw; height: 2.4cqw; border-radius: 50%; background: var(--g-red-2); border: .25cqw solid var(--g-outline); font-size: 1.4cqw; display: grid; place-items: center; font-weight: 700; }
+.side .wrapb { position: relative; }
+
+.next { left: 50%; bottom: 4%; transform: translateX(-50%); width: 34%; display: grid; gap: .5cqw; }
+.next .lbl { display: flex; justify-content: space-between; font-size: 1.6cqw; font-weight: 700; }
+.bar { height: 2.6cqw; border: .3cqw solid var(--g-outline); border-radius: 99px; background: #2b2d31; overflow: hidden; box-shadow: 0 .35cqw 0 var(--g-outline); }
+.bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(180deg, var(--g-gold-1), var(--g-gold-2)); }
+.chip { padding: .5cqw 1.1cqw; border: .3cqw solid var(--g-outline); border-radius: 99px; font-size: 1.5cqw; font-weight: 700; }
+.comeback { left: 50%; top: 21%; transform: translateX(-50%); }
+
+.live-chip { left: 50%; top: 22%; transform: translateX(-50%); display: flex; align-items: center; gap: 1cqw; padding: .6cqw .7cqw .6cqw 1.4cqw; background: #2b2d31; border: .3cqw solid var(--g-outline); border-radius: 99px; font-size: 1.7cqw; font-weight: 700; box-shadow: 0 0 0 .35cqw var(--g-red-1); white-space: nowrap; }
+.live-chip .dot { width: 1.2cqw; height: 1.2cqw; border-radius: 50%; background: var(--g-red-1); }
+.live-chip .gbtn { padding: .6cqw 1.4cqw; font-size: 1.6cqw; border-radius: 99px; }
+.banner { left: 0; right: 0; top: 46%; text-align: center; font-size: 3.6cqw; font-weight: 700; padding: 1cqw; background: linear-gradient(90deg, transparent, rgba(200,16,46,.85) 20% 80%, transparent); }
+
+/* panels */
+.panel { left: 50%; top: 50%; transform: translate(-50%, -50%); width: 62%; height: 82%; background: var(--g-cream); border: .4cqw solid var(--g-outline); border-radius: 2cqw; box-shadow: 0 .6cqw 0 var(--g-outline); display: grid; grid-template-rows: auto auto 1fr auto; overflow: hidden; color: var(--g-outline); }
+.phead { display: flex; align-items: center; justify-content: space-between; padding: 1cqw 1.4cqw; border-bottom: .35cqw solid var(--g-outline); color: var(--g-white); }
+.phead h4 { margin: 0; font-size: 3cqw; font-weight: 700; }
+.x { width: 4.2cqw; height: 4.2cqw; font-size: 2.2cqw; position: relative; }
+.tabs { display: flex; gap: 1cqw; padding: 1cqw 1.4cqw 0; }
+.tabs .gbtn { padding: .7cqw 1.4cqw; font-size: 1.6cqw; color: #fff; }
+.items { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1cqw; padding: 1.2cqw 1.4cqw; align-content: start; }
+.item { position: relative; background: var(--g-card); border: .3cqw solid var(--g-outline); border-radius: 1.4cqw; padding: 1cqw; display: grid; grid-template-columns: auto 1fr; gap: .4cqw 1cqw; align-items: center; }
+.item .pic { grid-row: span 2; width: 6cqw; height: 6cqw; border-radius: 1cqw; border: .25cqw solid var(--g-outline); }
+.item .nm { font-size: 1.75cqw; font-weight: 700; line-height: 1.1; }
+.item .ds { font-size: 1.25cqw; font-weight: 500; color: #5b4a2c; line-height: 1.15; font-family: var(--font-game); }
+.item .gbtn { grid-column: 1 / -1; padding: .7cqw; font-size: 1.7cqw; color: #fff; }
+.ribbon { position: absolute; top: -1cqw; right: 1cqw; padding: .3cqw .9cqw; font-size: 1.1cqw; font-weight: 700; color: #fff; border: .25cqw solid var(--g-outline); border-radius: 99px; z-index: 2; }
+.pfoot { padding: .8cqw 1.4cqw; border-top: .25cqw solid var(--g-line); font-size: 1.35cqw; font-weight: 600; text-align: center; color: #5b4a2c; }
+
+/* auction overlay */
+.auc { left: 50%; bottom: 3%; transform: translateX(-50%); width: 64%; background: var(--g-cream); border: .4cqw solid var(--g-outline); border-radius: 2cqw; box-shadow: 0 .6cqw 0 var(--g-outline); color: var(--g-outline); overflow: hidden; }
+.auc .phead { padding: .8cqw 1.4cqw; }
+.auc .phead h4 { font-size: 2.3cqw; }
+.auc-body { display: grid; grid-template-columns: 1fr auto; gap: .6cqw 2cqw; padding: 1cqw 1.6cqw 1.4cqw; align-items: center; }
+.auc .bid { font-size: 5.6cqw; font-weight: 700; color: var(--g-cash); line-height: 1; }
+.auc .by { font-size: 1.6cqw; font-weight: 600; }
+.ring { grid-row: span 2; width: 9cqw; height: 9cqw; border-radius: 50%; display: grid; place-items: center; font-size: 3cqw; font-weight: 700; color: var(--g-white); background: conic-gradient(var(--g-red-1) 0 20%, #2b2d31 20%); border: .35cqw solid var(--g-outline); }
+.ring span { width: 75%; height: 75%; border-radius: 50%; background: var(--g-red-2); display: grid; place-items: center; border: .3cqw solid var(--g-outline); }
+.rescue { grid-column: 1 / -1; display: grid; gap: .3cqw; }
+.rescue .lbl { display: flex; justify-content: space-between; font-size: 1.4cqw; font-weight: 700; }
+.rescue .bar { height: 2cqw; }
+.abtns { grid-column: 1 / -1; display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 1cqw; }
+.abtns .gbtn { padding: 1cqw; font-size: 2cqw; color: #fff; }
+.jumbo { left: 50%; top: 4%; transform: translateX(-50%); width: 30%; height: 30%; background: #10111a; border: .5cqw solid #3a3b48; border-radius: .8cqw; display: grid; place-items: center; text-align: center; font-size: 1.6cqw; line-height: 1.25; }
+.jumbo b { display: block; font-size: 3.4cqw; color: var(--g-cash); }
+
+/* tokens */
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.sw { background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; display: grid; }
+.sw i { height: 54px; border-bottom: 3px solid var(--g-outline); }
+.sw div { padding: 8px 10px; display: grid; gap: 2px; }
+.sw b { font-size: 14px; }
+.sw span { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); }
+pre { margin: 0; background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.55; }
+ol.steps { margin: 0; padding-left: 22px; display: grid; gap: 8px; max-width: 76ch; }
+ol.steps li::marker { font-family: var(--font-mono); color: var(--blocker); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+.two > * { min-width: 0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Bankrupt Street · UI audit + production spec · v1</div>
+    <h1>Bankrupt Street UI spec</h1>
+    <p class="lede">An audit of the latest Nano Banana mockup, followed by the corrected screens, colour tokens and the exact recipe for building them in Roblox Studio. The mockups below are built in HTML to scale, so they show the real proportions on a 16:9 phone.</p>
+    <div class="verdict">
+      <div><span class="tag" style="color:var(--keep)">Keep</span><b>Visual style</b><span>Glossy gradient buttons, thick outlines, white outlined text, labelled icons and the cream panels all work for Roblox.</span></div>
+      <div><span class="tag" style="color:var(--high)">Redo</span><b>Layout</b><span>Copies the reference game's structure and puts buttons under the phone thumbstick. Too many controls at once.</span></div>
+      <div><span class="tag" style="color:var(--blocker)">Must change</span><b>Shop contents</b><span>Random crates with odds, bought bids and paid boosts break the GDD and Roblox's paid-random-item rules.</span></div>
+    </div>
+  </header>
+
+  <section>
+    <h2>Audit findings</h2>
+    <div class="filters" role="group" aria-label="Filter findings by severity">
+      <button type="button" data-f="all" aria-pressed="true">All</button>
+      <button type="button" data-f="blocker" aria-pressed="false">Blocker</button>
+      <button type="button" data-f="high" aria-pressed="false">High</button>
+      <button type="button" data-f="medium" aria-pressed="false">Medium</button>
+      <button type="button" data-f="keep" aria-pressed="false">Keep</button>
+    </div>
+    <div class="tablewrap">
+      <table id="findings">
+        <thead><tr><th>Severity</th><th>Where</th><th>Problem</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr data-s="blocker"><td><span class="sev blocker">Blocker</span></td><td>Shop: "House Auction Bid Crate"</td><td>A crate with rarity odds (0.01% Mansion…) bought with currency for bids. That is a paid random item and it sells bids. GDD §14.5 and §19 forbid both.</td><td>Delete it. The Robux store sells fixed items only: insurance, Lawyer Pass, VIP, Private Street, cosmetics.</td></tr>
+          <tr data-s="blocker"><td><span class="sev blocker">Blocker</span></td><td>"Limited Auction Pass", "x2 Auction Luck", "Bid Multiplier"</td><td>Auctions are won by timing and cash. Selling bid power or luck breaks pillar 4, "skill and timing beat wallets", and players will call it pay-to-win.</td><td>Remove. Auctions have no luck stat and no multipliers.</td></tr>
+          <tr data-s="blocker"><td><span class="sev blocker">Blocker</span></td><td>"x2 Gold Gains"</td><td>A paid online income boost. The GDD only allows VIP's 2× <em>offline</em> income.</td><td>Remove. VIP Landlord card explains "2× income while you're away".</td></tr>
+          <tr data-s="blocker"><td><span class="sev blocker">Blocker</span></td><td>Whole layout</td><td>Same structure as the reference game: 3-tab top bar, 2×2 left grid, right pass list, level bar with +5/+10/+25, multiplier chips bottom-right. Players and Roblox reviewers will see a clone.</td><td>Use the layout below. Keep the style, change the structure.</td></tr>
+          <tr data-s="high"><td><span class="sev high">High</span></td><td>Left button grid, cash bottom-left</td><td>On phones the movement thumbstick covers the bottom-left, and the jump button covers the bottom-right. Buttons there get pressed by accident or can't be pressed.</td><td>Cash top-centre, nav buttons middle-right, nothing in the thumb zones (toggle "Show phone zones" below).</td></tr>
+          <tr data-s="high"><td><span class="sev high">High</span></td><td>Timers</td><td>Only CRASH is shown. Rent every 5 minutes is the core loop and is missing.</td><td>Two stacked timers top-right: RENT and CRASH. CRASH turns into "CRASH LIVE · RENT ×3".</td></tr>
+          <tr data-s="high"><td><span class="sev high">High</span></td><td>Shop open over the street</td><td>The street and stage are the show. A big panel open by default hides them.</td><td>Panels open only on tap and close themselves when an auction goes live.</td></tr>
+          <tr data-s="high"><td><span class="sev high">High</span></td><td>Invented systems</td><td>Property Pass, Loan Index, Auction Feed, Prestige XP, "Auction Legend" rank, Renovate/Expand/Appraise, Luxury Key, Friend Boost and Daily Auctions are not in the GDD.</td><td>Cut them. Add a system only after it's written into the GDD with numbers.</td></tr>
+          <tr data-s="high"><td><span class="sev high">High</span></td><td>Colour meaning</td><td>Shop tab red, Auctions tab green, Gift red. Colours don't mean anything consistent.</td><td>Fixed meanings: red auction, gold money and upgrades, green buy and claim, blue navigation, purple Robux and VIP, pink events.</td></tr>
+          <tr data-s="medium"><td><span class="sev medium">Medium</span></td><td>Small text</td><td>Odds, "for 3 Bids" and chip labels are around 8–9 px on a phone. Unreadable.</td><td>Minimum 15 px on a phone after scaling (28 px at the 1280×720 design size).</td></tr>
+          <tr data-s="medium"><td><span class="sev medium">Medium</span></td><td>Three navigation systems</td><td>Top tabs, left grid and right grid all open things. Players don't know where to look.</td><td>One navigation column on the right, plus the Store button under the timers.</td></tr>
+          <tr data-s="medium"><td><span class="sev medium">Medium</span></td><td>Bottom-right chips "x1.1 x1.3 N/A"</td><td>No meaning to a player, and they sit on the jump button.</td><td>Remove. Show only real active effects (Comeback 2×) as a chip under the cash.</td></tr>
+          <tr data-s="keep"><td><span class="sev keep">Keep</span></td><td>Button style</td><td>Glossy gradients, thick dark outlines, white outlined text, a drop shadow under each button.</td><td>Use as the component recipe below.</td></tr>
+          <tr data-s="keep"><td><span class="sev keep">Keep</span></td><td>Labelled icon buttons</td><td>House, Shop, Gift and Trophy with text labels.</td><td>Keep, as UPGRADE, SHOP, DAILY, HALL.</td></tr>
+          <tr data-s="keep"><td><span class="sev keep">Keep</span></td><td>Insurance shield, crash chip, cream panel</td><td>Clear, on-theme, readable.</td><td>Keep as is.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div style="display:flex; flex-wrap:wrap; gap:12px 24px; align-items:baseline; justify-content:space-between">
+      <h2>Corrected screens</h2>
+      <label class="toggle"><input type="checkbox" id="zones"> Show phone zones (Roblox buttons, thumbstick, jump)</label>
+    </div>
+    <div class="screens" id="screens">
+      <figure>
+        <div class="scr">
+          <div class="zone z-roblox">Roblox menu</div><div class="zone z-stick">Thumbstick</div><div class="zone z-jump">Jump</div>
+          <div class="cash"><div class="amt stroke">$12,450</div><div class="inc stroke">+$85/min</div><div class="shield stroke">INSURE<b>x2</b></div></div>
+          <div class="timers"><div class="timer stroke"><span>RENT</span><span>2:41</span></div><div class="timer crash-t stroke"><span>CRASH</span><span>14:02</span></div></div>
+          <div class="gbtn purple store stroke">STORE</div>
+          <div class="side">
+            <div class="wrapb"><div class="gbtn gold stroke"><i class="ico"></i>UPGRADE</div></div>
+            <div class="wrapb"><div class="gbtn green stroke"><i class="ico"></i>SHOP</div></div>
+            <div class="wrapb"><span class="badge">!</span><div class="gbtn pink stroke"><i class="ico"></i>DAILY</div></div>
+            <div class="wrapb"><div class="gbtn blue stroke"><i class="ico"></i>HALL</div></div>
+          </div>
+          <div class="next"><div class="lbl stroke"><span>NEXT: TRAILER</span><span>$372 / $600</span></div><div class="bar"><i style="width:62%"></i></div></div>
+        </div>
+        <figcaption><b>HUD, normal play</b><span>Cash top-centre, timers and Store top-right, one nav column, a "next house" goal bar at the bottom. The middle of the screen stays free for the street.</span></figcaption>
+      </figure>
+
+      <figure>
+        <div class="scr crash">
+          <div class="zone z-roblox">Roblox menu</div><div class="zone z-stick">Thumbstick</div><div class="zone z-jump">Jump</div>
+          <div class="cash"><div class="amt stroke">$620</div><div class="inc stroke">+$85/min</div><div class="shield stroke">INSURE<b>x2</b></div></div>
+          <div class="timers"><div class="timer stroke"><span>RENT</span><span>0:45</span></div><div class="timer live stroke"><span>CRASH LIVE</span><span>×3</span></div></div>
+          <div class="gbtn purple store stroke">STORE</div>
+          <div class="live-chip stroke"><span class="dot"></span>LIVE: Maya's Villa · $24,800 · 0:12<span class="gbtn red">WATCH</span></div>
+          <div class="banner stroke">MARKET CRASH · NEXT RENT $750</div>
+          <div class="side">
+            <div class="wrapb"><div class="gbtn gold stroke"><i class="ico"></i>UPGRADE</div></div>
+            <div class="wrapb"><div class="gbtn green stroke"><i class="ico"></i>SHOP</div></div>
+            <div class="wrapb"><div class="gbtn pink stroke"><i class="ico"></i>DAILY</div></div>
+            <div class="wrapb"><div class="gbtn blue stroke"><i class="ico"></i>HALL</div></div>
+          </div>
+        </div>
+        <figcaption><b>HUD, crash + live auction</b><span>Red tint and a banner with the player's own next rent. A live auction appears as one chip with WATCH, so nobody misses the show.</span></figcaption>
+      </figure>
+
+      <figure>
+        <div class="scr dim-bg">
+          <div class="zone z-roblox">Roblox menu</div><div class="zone z-stick">Thumbstick</div><div class="zone z-jump">Jump</div>
+          <div class="panel">
+            <div class="phead purple"><h4 class="stroke">STORE</h4><div class="gbtn blue x stroke">X</div></div>
+            <div class="tabs"><div class="gbtn purple stroke">PROTECTION</div><div class="gbtn grey stroke">PASSES</div><div class="gbtn grey stroke">LOOKS</div></div>
+            <div class="items">
+              <div class="item"><i class="pic purple"></i><div class="nm">Crash Insurance x1</div><div class="ds">Pays a missed rent once. One use per day.</div><div class="gbtn green stroke">R$ 79</div></div>
+              <div class="item"><span class="ribbon gold stroke">BEST VALUE</span><i class="pic purple"></i><div class="nm">Crash Insurance x5</div><div class="ds">Five charges. One use per day.</div><div class="gbtn green stroke">R$ 299</div></div>
+              <div class="item"><i class="pic blue"></i><div class="nm">Lawyer Pass x1</div><div class="ds">+15 seconds on your own auction.</div><div class="gbtn green stroke">R$ 39</div></div>
+              <div class="item"><i class="pic blue"></i><div class="nm">Lawyer Pass x5</div><div class="ds">Five uses, one per auction.</div><div class="gbtn green stroke">R$ 129</div></div>
+            </div>
+            <div class="pfoot">Nothing in the store changes bids, auctions or rank.</div>
+          </div>
+        </div>
+        <figcaption><b>Robux store</b><span>Fixed items with clear effects and prices. No crates, no odds, no boosts. The footer line tells players it's fair.</span></figcaption>
+      </figure>
+
+      <figure>
+        <div class="scr">
+          <div class="zone z-roblox">Roblox menu</div><div class="zone z-stick">Thumbstick</div><div class="zone z-jump">Jump</div>
+          <div class="jumbo stroke">SOLD IN 0:12<b>$24,800</b>Maya's Villa</div>
+          <div class="auc">
+            <div class="phead red"><h4 class="stroke">ON THE BLOCK: Maya's Villa</h4><span class="chip gold stroke">4 properties</span></div>
+            <div class="auc-body">
+              <div><div class="by">CURRENT BID</div><div class="bid stroke">$24,800</div></div>
+              <div class="ring"><span class="stroke">0:12</span></div>
+              <div class="by">by Jayden · next bid at least $26,040</div>
+              <div class="rescue"><div class="lbl"><span>RESCUE MAYA</span><span>$1,650 / $2,310</span></div><div class="bar"><i style="width:71%"></i></div></div>
+              <div class="abtns"><div class="gbtn red stroke">BID $26,040</div><div class="gbtn gold stroke">CHIP IN</div><div class="gbtn blue stroke">WATCH</div></div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>Live auction</b><span>Bid panel at the bottom while the jumbotron stays visible above, so the moment reads in a 7-second clip. The bid button shows the exact amount it will bid.</span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>Colour tokens</h2>
+    <p class="note">Every button gradient runs top to bottom (UIGradient Rotation 90). The outline is the same dark navy everywhere.</p>
+    <div class="swatches" id="swatches"></div>
+  </section>
+
+  <section class="two">
+    <div style="display:grid; gap:12px">
+      <h2>Type and sizes</h2>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Use</th><th>Roblox font</th><th>Size at 1280×720</th></tr></thead>
+          <tbody>
+            <tr><td>Cash amount</td><td class="code">FredokaOne</td><td class="code">64</td></tr>
+            <tr><td>Auction bid</td><td class="code">FredokaOne</td><td class="code">80</td></tr>
+            <tr><td>Panel titles</td><td class="code">FredokaOne</td><td class="code">40</td></tr>
+            <tr><td>Button labels</td><td class="code">FredokaOne</td><td class="code">28–32</td></tr>
+            <tr><td>Descriptions</td><td class="code">BuilderSans Bold</td><td class="code">28 (min)</td></tr>
+            <tr><td>Tap target</td><td>—</td><td class="code">≥ 88 × 88</td></tr>
+            <tr><td>Outline (frames)</td><td>UIStroke Border</td><td class="code">4</td></tr>
+            <tr><td>Outline (text)</td><td>UIStroke Contextual</td><td class="code">3</td></tr>
+            <tr><td>Corner radius</td><td>UICorner</td><td class="code">18 (pills 0.5 scale)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Design everything in pixels at 1280×720 and add one UIScale that scales the whole UI to the screen. On a typical phone the scale is about 0.55, so 28 px becomes about 15 px and an 88 px button about 48 px, both still readable and tappable.</p>
+    </div>
+    <div style="display:grid; gap:12px">
+      <h2>HUD instance tree</h2>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Instance</th><th>Anchor</th><th>Position</th><th>Size (px @720p)</th></tr></thead>
+          <tbody>
+            <tr><td class="code">HUD (ScreenGui)</td><td colspan="3">ScreenInsets = CoreUISafeInsets, ResetOnSpawn = false</td></tr>
+            <tr><td class="code">CashPanel</td><td class="code">0.5, 0</td><td class="code">{0.5,0},{0,16}</td><td class="code">360 × 120</td></tr>
+            <tr><td class="code">InsuranceBadge</td><td class="code">0, 0.5</td><td class="code">right edge of cash</td><td class="code">70 × 78</td></tr>
+            <tr><td class="code">Timers</td><td class="code">1, 0</td><td class="code">{1,-16},{0,16}</td><td class="code">240 × 104</td></tr>
+            <tr><td class="code">StoreButton</td><td class="code">1, 0</td><td class="code">{1,-16},{0,132}</td><td class="code">240 × 56</td></tr>
+            <tr><td class="code">NavColumn</td><td class="code">1, 0.5</td><td class="code">{1,-16},{0.55,0}</td><td class="code">240 × 240 (2×2)</td></tr>
+            <tr><td class="code">NextHouseBar</td><td class="code">0.5, 1</td><td class="code">{0.5,0},{1,-24}</td><td class="code">440 × 64</td></tr>
+            <tr><td class="code">LiveAuctionChip</td><td class="code">0.5, 0</td><td class="code">{0.5,0},{0,150}</td><td class="code">auto × 52</td></tr>
+            <tr><td class="code">EventBanner</td><td class="code">0.5, 0.5</td><td class="code">{0.5,0},{0.48,0}</td><td class="code">full × 72</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Button recipe (Luau)</h2>
+    <p class="note">One helper builds every glossy button the same way, so the style never drifts. Put it in <span class="mono">src/client/UI/Button.luau</span>.</p>
+<pre>local Theme = {
+	Outline = Color3.fromHex("1B1B2F"),
+	Red    = { Color3.fromHex("FF4D4D"), Color3.fromHex("C8102E") },
+	Gold   = { Color3.fromHex("FFE14D"), Color3.fromHex("F5A300") },
+	Green  = { Color3.fromHex("7CFF5B"), Color3.fromHex("22B83A") },
+	Blue   = { Color3.fromHex("5BC8FF"), Color3.fromHex("1E6FE8") },
+	Purple = { Color3.fromHex("C77DFF"), Color3.fromHex("7B2FF7") },
+	Pink   = { Color3.fromHex("FF6FD8"), Color3.fromHex("E0218A") },
+}
+
+local function makeButton(text: string, colour: { Color3 }, size: UDim2): TextButton
+	local b = Instance.new("TextButton")
+	b.Size = size
+	b.BackgroundColor3 = Color3.new(1, 1, 1)
+	b.AutoButtonColor = false
+	b.Text = text
+	b.FontFace = Font.fromEnum(Enum.Font.FredokaOne)
+	b.TextSize = 30
+	b.TextColor3 = Color3.new(1, 1, 1)
+
+	local grad = Instance.new("UIGradient")
+	grad.Color = ColorSequence.new(colour[1], colour[2])
+	grad.Rotation = 90
+	grad.Parent = b
+
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 18)
+
+	local border = Instance.new("UIStroke")
+	border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	border.Color = Theme.Outline
+	border.Thickness = 4
+	border.Parent = b
+
+	local textStroke = Instance.new("UIStroke")
+	textStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+	textStroke.Color = Theme.Outline
+	textStroke.Thickness = 3
+	textStroke.Parent = b
+
+	-- glossy highlight on the top half
+	local shine = Instance.new("Frame")
+	shine.BackgroundColor3 = Color3.new(1, 1, 1)
+	shine.BackgroundTransparency = 0.6
+	shine.BorderSizePixel = 0
+	shine.Size = UDim2.new(0.88, 0, 0.42, 0)
+	shine.Position = UDim2.new(0.06, 0, 0.06, 0)
+	shine.ZIndex = b.ZIndex
+	Instance.new("UICorner", shine).CornerRadius = UDim.new(0, 12)
+	shine.Parent = b
+
+	return b
+end</pre>
+  </section>
+
+  <section>
+    <h2>Production order</h2>
+    <ol class="steps">
+      <li>Build <span class="mono">Theme.luau</span> and the button helper first, then a UIScale script on the HUD.</li>
+      <li>HUD: CashPanel, Timers, Store button, NavColumn, NextHouseBar. Hook them to the server state that M0 already pushes.</li>
+      <li>Auction overlay and LiveAuctionChip (M1). Test on the phone emulator in Studio: iPhone SE landscape and a 16:9 Android.</li>
+      <li>Crash and bankrupt states: tint, banner, stinger.</li>
+      <li>Property shop and upgrade panels in in-game cash.</li>
+      <li>Robux store last (M2), with the fixed items above and real product IDs.</li>
+      <li>ForgeGUI makes the icons (house, shop bag, gift, trophy, shield, gavel) and panel header art. Text always stays as TextLabels.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+(function () {
+  const sw = [
+    ["Auction red", "--g-red-1", "--g-red-2", "#FF4D4D → #C8102E", "Bid, auction, crash"],
+    ["Cash gold", "--g-gold-1", "--g-gold-2", "#FFE14D → #F5A300", "Money, upgrades"],
+    ["Money green", "--g-green-1", "--g-green-2", "#7CFF5B → #22B83A", "Buy, claim, income"],
+    ["Street blue", "--g-blue-1", "--g-blue-2", "#5BC8FF → #1E6FE8", "Navigation, close"],
+    ["VIP purple", "--g-purple-1", "--g-purple-2", "#C77DFF → #7B2FF7", "Robux, VIP, insurance"],
+    ["Event pink", "--g-pink-1", "--g-pink-2", "#FF6FD8 → #E0218A", "Daily, events"],
+    ["Locked", "--g-grey-1", "--g-grey-2", "#B4B9C0 → #7A8089", "Locked, inactive tabs"],
+    ["Panel cream", "--g-cream", "--g-card", "#FFF4DC / #FFE6B0", "Panel body, cards"],
+    ["Outline", "--g-outline", "--g-outline", "#1B1B2F", "Every outline + text stroke"],
+    ["Cash numbers", "--g-cash", "--g-cash", "#FFD23F", "Big money digits"],
+  ];
+  document.getElementById("swatches").innerHTML = sw.map(([n, a, b, hex, use]) =>
+    `<div class="sw"><i style="background:linear-gradient(180deg,var(${a}),var(${b}))"></i><div><b>${n}</b><span>${hex}</span><span>${use}</span></div></div>`).join("");
+
+  const btns = document.querySelectorAll(".filters button");
+  btns.forEach(b => b.addEventListener("click", () => {
+    btns.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    const f = b.dataset.f;
+    document.querySelectorAll("#findings tbody tr").forEach(tr => { tr.hidden = f !== "all" && tr.dataset.s !== f; });
+  }));
+  document.getElementById("zones").addEventListener("change", e => {
+    document.getElementById("screens").classList.toggle("show-zones", e.target.checked);
+  });
+})();
+</script>
