@@ -91,6 +91,21 @@ function Formulas.houseLevelAfterBankruptcy(level: number, drop: number): number
 	return math.max(1, level - drop)
 end
 
+-- Sell-back price (GDD §5.4).
+function Formulas.sellPrice(cost: number, sellBackRatio: number): number
+	return Formulas.floorMoney(cost * sellBackRatio)
+end
+
+-- Lowest slot in 1..maxSlots not in `used`, or nil when full.
+function Formulas.firstFreeSlot(used: { [number]: any }, maxSlots: number): number?
+	for i = 1, maxSlots do
+		if used[i] == nil then
+			return i
+		end
+	end
+	return nil
+end
+
 -- Session lock decision for ProfileManager (GDD §17.2), kept pure so the spec can test it.
 --   "free"  no lock, or a released one -> take it
 --   "mine"  this server already holds it -> refresh it

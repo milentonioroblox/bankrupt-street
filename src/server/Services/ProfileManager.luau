@@ -22,6 +22,7 @@ local Enums = require(Shared.Enums)
 local Formulas = require(Shared.Formulas)
 local Types = require(Shared.Types)
 local Lib = script.Parent.Parent.Lib
+local IncomeMath = require(Lib.IncomeMath)
 local MockStore = require(Lib.MockStore)
 local ProfileSchema = require(Lib.ProfileSchema)
 local Net = require(script.Parent.Net)
@@ -206,12 +207,28 @@ local function release(s: Session)
 end
 
 local function publicSlice(profile: Types.Profile): Types.StateSlice
+	local now = os.time()
+	local props: { Types.PropertyView } = {}
+	for _, inst in profile.properties do
+		table.insert(props, {
+			instanceId = inst.instanceId,
+			propertyId = inst.propertyId,
+			slotIndex = inst.slotIndex,
+			boundUntil = inst.boundUntil,
+		})
+	end
 	return {
+		serverTime = now,
 		cash = profile.cash,
 		spendable = profile.cash - profile.reservedCash,
+		incomePerMinute = IncomeMath.effectivePerMinute(profile, now),
 		houseLevel = profile.houseLevel,
 		houseName = Config.HouseDisplayNames[profile.houseLevel] or "?",
 		streetTier = profile.streetTier,
+		slotsUsed = #profile.properties,
+		slotsMax = Config.HousePropertySlots[profile.houseLevel] or 0,
+		properties = props,
+		comebackUntil = profile.comebackBoostUntil,
 	}
 end
 

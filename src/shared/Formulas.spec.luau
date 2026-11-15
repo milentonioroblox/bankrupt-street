@@ -80,6 +80,12 @@ return function(): (number, number)
 	check("lock held", Formulas.lockDecision({ token = "other", heartbeatAt = 950 }, 1000, "me", 90), "held")
 	check("lock stale", Formulas.lockDecision({ token = "other", heartbeatAt = 910 }, 1000, "me", 90), "stale")
 
+	check("sell price", Formulas.sellPrice(50, 0.40), 20)
+	check("sell price corner", Formulas.sellPrice(2000, 0.40), 800)
+	check("free slot first", Formulas.firstFreeSlot({}, 2), 1)
+	check("free slot gap", Formulas.firstFreeSlot({ [1] = true, [3] = true }, 3), 2)
+	check("free slot full", Formulas.firstFreeSlot({ [1] = true, [2] = true }, 2), nil)
+
 	check("valid amount", Formulas.isValidAmount(5), true)
 	check("invalid neg", Formulas.isValidAmount(-1), false)
 	check("invalid nan", Formulas.isValidAmount(0 / 0), false)

@@ -42,6 +42,7 @@ Enums.PropertyType = table.freeze({
 Enums.Push = table.freeze({
 	State = "State",
 	Notice = "Notice",
+	OfflineIncome = "OfflineIncome", -- { amount, seconds }
 })
 
 -- Error codes used in NetResult.code (Appendix B).
@@ -56,6 +57,12 @@ Enums.Error = table.freeze({
 	NoPlot = "no_plot",
 	TooFar = "too_far",
 	CannotAfford = "cannot_afford",
+	Locked = "locked",
+	NoSlot = "no_slot",
+	Max = "max",
+	Bound = "bound",
+	NeedConsent = "need_consent",
+	NotFound = "not_found",
 })
 
 return table.freeze(Enums)

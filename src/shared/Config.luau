@@ -32,6 +32,7 @@ Config.IncomeTickSeconds = 1
 Config.SellBackRatio = 0.40
 Config.OfflineIncomeCapSeconds = 8 * 3600
 Config.OfflineIncomeRate = 0.5 -- v1.1 (new)
+Config.OfflineIncomeNoticeMinSeconds = 60 -- GDD §5.3: grant silently below this
 Config.VIPOfflineIncomeMultiplier = 2.0
 
 Config.RentIntervalSeconds = 300 -- v1.1 (was 600)

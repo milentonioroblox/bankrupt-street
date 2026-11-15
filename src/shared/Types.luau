@@ -59,13 +59,21 @@ export type StoredRecord = { profile: Profile, lock: SessionLock? }
 
 export type NetResult = { ok: boolean, code: string?, message: string?, data: any? }
 
+export type PropertyView = { instanceId: string, propertyId: string, slotIndex: number, boundUntil: number }
+
 -- Public slice of the profile pushed to its owner only (never other players' cash).
 export type StateSlice = {
+	serverTime: number,
 	cash: number,
 	spendable: number,
+	incomePerMinute: number, -- effective, what the HUD ticker predicts with
 	houseLevel: number,
 	houseName: string,
 	streetTier: number,
+	slotsUsed: number,
+	slotsMax: number,
+	properties: { PropertyView },
+	comebackUntil: number,
 }
 
 -- A ModuleScript must return exactly one value.

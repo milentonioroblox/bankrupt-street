@@ -2,7 +2,7 @@
 -- Debug commands (GDD §22 work order, §23). Studio, or group rank >= Config.AdminMinRank when
 -- Config.AdminGroupId is set. Every command is logged.
 --
--- Chat:  /givecash n   /setcash n   /save   /profile
+-- Chat:  /givecash n   /setcash n   /sethouse n   /giveprop id   /save   /profile
 -- Studio test hook: ServerStorage.DebugHook (BindableFunction), so command-bar / MCP scripts
 -- can drive the live services: DebugHook:Invoke("givecash", userId, 500)
 
@@ -15,8 +15,10 @@ local TextChatService = game:GetService("TextChatService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local EconomyService = require(script.Parent.EconomyService)
+local HouseService = require(script.Parent.HouseService)
 local PlotService = require(script.Parent.PlotService)
 local ProfileManager = require(script.Parent.ProfileManager)
+local PropertyService = require(script.Parent.PropertyService)
 
 local DebugService = {}
 
@@ -54,6 +56,20 @@ local commands: { [string]: Command } = {
 			return "usage: /setcash <whole number>"
 		end
 		return `cash set to ${math.floor(n)}`
+	end,
+	sethouse = function(player, args)
+		local n = tonumber(args[1])
+		if not n or not HouseService.setLevel(player, n) then
+			return `usage: /sethouse <1-{Config.MaxHouseLevel}>`
+		end
+		return `house set to {Config.HouseDisplayNames[n]}`
+	end,
+	giveprop = function(player, args)
+		local id = args[1]
+		if not id or not PropertyService.give(player, id) then
+			return "usage: /giveprop <propertyId> (needs a free slot)"
+		end
+		return `gave {id}`
 	end,
 	save = function(player)
 		ProfileManager.saveNow(player)

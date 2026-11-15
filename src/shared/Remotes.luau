@@ -13,7 +13,10 @@ local Remotes = {
 	-- Request names (M0 subset; add the rest of Appendix B as milestones land)
 	GetState = "GetState",
 	ClaimPlot = "ClaimPlot",
-	ReleasePlot = "ReleasePlot",
+	UpgradeHouse = "UpgradeHouse",
+	BuyProperty = "BuyProperty",
+	SellProperty = "SellProperty",
+	PlaceProperty = "PlaceProperty",
 }
 
 return Remotes
